@@ -1,0 +1,244 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Dandory;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
+
+class DandoryController extends Controller
+{
+    /**
+     * Set up middleware for permissions based on new roles.
+     */
+    public function __construct()
+    {
+        // Set the default timezone for Indonesia (WIB)
+        date_default_timezone_set('Asia/Jakarta');
+        
+        // Admin can do everything
+        $this->middleware('permission:dandory-list|dandory-create|dandory-edit|dandory-delete', ['only' => ['index', 'show']]);
+        $this->middleware('permission:dandory-create', ['only' => ['create', 'store']]);
+        $this->middleware('permission:dandory-delete', ['only' => ['destroy']]);
+    }
+
+    /**
+     * Display a listing of the resource based on user role.
+     */
+    public function index()
+    {
+        $user = Auth::user();
+        $query = Dandory::latest();
+        // Eager load roles to avoid N+1 query problem
+        $users = User::with('roles')->get();
+
+        // Admin sees all tickets
+        if ($user->hasRole('Admin')) {
+            $activeDandories = $query->whereIn('status', ['TO DO', 'IN PROGRESS', 'PENDING'])->get();
+            $finishedDandories = Dandory::where('status', 'FINISH')->get();
+            return view('dandories.index', compact('activeDandories', 'finishedDandories', 'users'));
+        }
+
+        // Requestor sees only their own tickets
+        if ($user->hasRole('Requestor')) {
+            $activeDandories = $query->whereIn('status', ['TO DO', 'IN PROGRESS', 'PENDING'])->where('added_by', $user->id)->get();
+            $finishedDandories = Dandory::where('status', 'FINISH')->where('added_by', $user->id)->get();
+            return view('dandories.index', compact('activeDandories', 'finishedDandories', 'users'));
+        }
+
+        // Teknisi sees tickets assigned to them
+        if ($user->hasRole('Teknisi')) {
+            $activeDandories = $query->whereIn('status', ['TO DO', 'IN PROGRESS', 'PENDING'])->where('assigned_to', $user->id)->get();
+            $finishedDandories = Dandory::where('status', 'FINISH')->where('assigned_to', $user->id)->get();
+            return view('dandories.index', compact('activeDandories', 'finishedDandories', 'users'));
+        }
+
+        // For any other role, they see nothing
+        return view('dandories.index', [
+            'activeDandories' => collect(),
+            'finishedDandories' => collect(),
+            'users' => $users
+        ]);
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        return view('dandories.create');
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        $validatedData = $request->validate([
+            'requestor' => 'required|string|max:255',
+            'customer' => 'required|string|max:255',
+            'nama_part' => 'required|string|max:255',
+            'nomor_part' => 'required|string|max:255',
+            'proses' => 'required|string|max:255',
+            'mesin' => 'required|string|max:255',
+            'qty_pcs' => 'required|integer|min:1',
+            'planning_shift' => 'required|string|max:255',
+            'notes' => 'nullable|string',
+            'line_production' => 'required|string|max:255', // Added this line
+        ]);
+        
+        $lastTicket = Dandory::latest()->first();
+        $lastId = $lastTicket ? $lastTicket->id : 0;
+        $newId = $lastId + 1;
+        
+        $validatedData['ddcnk_id'] = 'DDCNK-' . $newId;
+        $validatedData['added_by'] = Auth::id();
+        
+        Dandory::create($validatedData);
+
+        return redirect()->route('dandories.index')->with('success', 'Dandory ticket created successfully!');
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(Dandory $dandory)
+    {
+        $user = Auth::user();
+        if ($user->hasRole('Requestor') && $dandory->added_by !== $user->id) {
+            abort(403);
+        }
+        return view('dandories.show', compact('dandory'));
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(Dandory $dandory)
+    {
+        $user = Auth::user();
+        if (!$user->hasRole('Admin')) {
+            abort(403);
+        }
+
+        $allUsers = User::all();
+        $teknisiUsers = $allUsers->filter(fn($u) => $u->hasRole('Teknisi'));
+        
+        return view('dandories.edit', compact('dandory', 'teknisiUsers'));
+    }
+
+    /**
+     * Update the specified resource in storage. Only for Admin.
+     */
+    public function update(Request $request, Dandory $dandory)
+    {
+        if (!Auth::user()->hasRole('Admin')) {
+            abort(403);
+        }
+
+        $validatedData = $request->validate([
+            'requestor' => 'required|string|max:255',
+            'customer' => 'required|string|max:255',
+            'nama_part' => 'required|string|max:255',
+            'nomor_part' => 'required|string|max:255',
+            'proses' => 'required|string|max:255',
+            'mesin' => 'required|string|max:255',
+            'qty_pcs' => 'required|integer|min:1',
+            'planning_shift' => 'required|string|max:255',
+            'status' => 'required|in:TO DO,IN PROGRESS,FINISH,PENDING',
+            'notes' => 'nullable|string',
+            'assigned_to' => 'nullable|integer',
+            'line_production' => 'required|string|max:255', // Added this line
+        ]);
+        
+        $dandory->update($validatedData);
+
+        return redirect()->route('dandories.show', $dandory)->with('success', 'Dandory ticket updated successfully!');
+    }
+
+    /**
+     * Update only the status of the specified resource.
+     */
+    public function updateStatus(Request $request, Dandory $dandory)
+    {
+        $request->validate([
+            'status' => 'required|in:TO DO,IN PROGRESS,FINISH,PENDING',
+        ]);
+
+        $user = Auth::user();
+        // Allow Admin to change status regardless of assignment
+        if (!$user->hasRole('Admin') && $dandory->assigned_to != $user->id) {
+            abort(403, 'You can only update the status of tickets assigned to you.');
+        }
+
+        $newStatus = $request->input('status');
+        $updateData = ['status' => $newStatus];
+
+        if ($newStatus == 'IN PROGRESS') {
+            // Check-in automatically when status changes to 'IN PROGRESS'
+            $updateData['check_in'] = Carbon::now();
+        } elseif ($newStatus == 'FINISH') {
+            // Check-out automatically when status changes to 'FINISH'
+            $updateData['check_out'] = Carbon::now();
+        } elseif ($newStatus == 'TO DO') {
+            // Reset check-in and check-out times if status is reverted to 'TO DO'
+            $updateData['check_in'] = null;
+            $updateData['check_out'] = null;
+        }
+
+        $dandory->update($updateData);
+
+        return response()->json(['success' => true, 'message' => 'Status updated successfully.']);
+    }
+
+    /**
+     * Update only the planning fields for a Teknisi.
+     */
+    public function updatePlanning(Request $request, Dandory $dandory)
+    {
+        $request->validate([
+            'field' => 'required|in:check_in,check_out,planning_shift',
+            'value' => 'nullable|string',
+        ]);
+
+        if (Auth::user()->hasRole('Teknisi') && $dandory->assigned_to != Auth::id()) {
+            return response()->json(['success' => false, 'error' => 'You can only update planning for tickets assigned to you.'], 403);
+        }
+
+        $field = $request->input('field');
+        $value = $request->input('value');
+        
+        $dandory->update([$field => $value]);
+        
+        return response()->json(['success' => true, 'message' => 'Planning setting updated successfully.']);
+    }
+    
+    /**
+     * Assign a ticket to a Teknisi. Only for Admin.
+     */
+    public function assign(Request $request, Dandory $dandory)
+    {
+        if (!Auth::user()->hasRole('Admin')) {
+            abort(403);
+        }
+
+        $request->validate([
+            'assigned_to' => 'nullable|exists:users,id',
+        ]);
+        
+        $dandory->update(['assigned_to' => $request->assigned_to]);
+
+        return response()->json(['success' => true, 'message' => 'Ticket assigned successfully.']);
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(Dandory $dandory)
+    {
+        $dandory->delete();
+        return redirect()->route('dandories.index')->with('success', 'Dandory ticket deleted successfully!');
+    }
+}
