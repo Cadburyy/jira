@@ -28,17 +28,13 @@ class Dandory extends Model
         'added_by',
     ];
 
-    /**
-     * Get the user who is assigned to this dandory ticket.
-     */
+
     public function assignedUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'assigned_to');
     }
 
-    /**
-     * Get the user who created this dandory ticket.
-     */
+
     public function addedByUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'added_by');

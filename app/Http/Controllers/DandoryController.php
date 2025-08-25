@@ -15,10 +15,9 @@ class DandoryController extends Controller
      */
     public function __construct()
     {
-        // Set the default timezone for Indonesia (WIB)
+
         date_default_timezone_set('Asia/Jakarta');
-        
-        // Admin can do everything
+
         $this->middleware('permission:dandory-list|dandory-create|dandory-edit|dandory-delete', ['only' => ['index', 'show']]);
         $this->middleware('permission:dandory-create', ['only' => ['create', 'store']]);
         $this->middleware('permission:dandory-delete', ['only' => ['destroy']]);
@@ -31,31 +30,27 @@ class DandoryController extends Controller
     {
         $user = Auth::user();
         $query = Dandory::latest();
-        // Eager load roles to avoid N+1 query problem
+
         $users = User::with('roles')->get();
 
-        // Admin sees all tickets
         if ($user->hasRole('Admin')) {
             $activeDandories = $query->whereIn('status', ['TO DO', 'IN PROGRESS', 'PENDING'])->get();
             $finishedDandories = Dandory::where('status', 'FINISH')->get();
             return view('dandories.index', compact('activeDandories', 'finishedDandories', 'users'));
         }
 
-        // Requestor sees only their own tickets
         if ($user->hasRole('Requestor')) {
             $activeDandories = $query->whereIn('status', ['TO DO', 'IN PROGRESS', 'PENDING'])->where('added_by', $user->id)->get();
             $finishedDandories = Dandory::where('status', 'FINISH')->where('added_by', $user->id)->get();
             return view('dandories.index', compact('activeDandories', 'finishedDandories', 'users'));
         }
 
-        // Teknisi sees tickets assigned to them
         if ($user->hasRole('Teknisi')) {
             $activeDandories = $query->whereIn('status', ['TO DO', 'IN PROGRESS', 'PENDING'])->where('assigned_to', $user->id)->get();
             $finishedDandories = Dandory::where('status', 'FINISH')->where('assigned_to', $user->id)->get();
             return view('dandories.index', compact('activeDandories', 'finishedDandories', 'users'));
         }
 
-        // For any other role, they see nothing
         return view('dandories.index', [
             'activeDandories' => collect(),
             'finishedDandories' => collect(),
@@ -86,7 +81,7 @@ class DandoryController extends Controller
             'qty_pcs' => 'required|integer|min:1',
             'planning_shift' => 'required|string|max:255',
             'notes' => 'nullable|string',
-            'line_production' => 'required|string|max:255', // Added this line
+            'line_production' => 'required|string|max:255',
         ]);
         
         $lastTicket = Dandory::latest()->first();
@@ -150,7 +145,7 @@ class DandoryController extends Controller
             'status' => 'required|in:TO DO,IN PROGRESS,FINISH,PENDING',
             'notes' => 'nullable|string',
             'assigned_to' => 'nullable|integer',
-            'line_production' => 'required|string|max:255', // Added this line
+            'line_production' => 'required|string|max:255',
         ]);
         
         $dandory->update($validatedData);
@@ -168,7 +163,7 @@ class DandoryController extends Controller
         ]);
 
         $user = Auth::user();
-        // Allow Admin to change status regardless of assignment
+
         if (!$user->hasRole('Admin') && $dandory->assigned_to != $user->id) {
             abort(403, 'You can only update the status of tickets assigned to you.');
         }
@@ -177,13 +172,13 @@ class DandoryController extends Controller
         $updateData = ['status' => $newStatus];
 
         if ($newStatus == 'IN PROGRESS') {
-            // Check-in automatically when status changes to 'IN PROGRESS'
+
             $updateData['check_in'] = Carbon::now();
         } elseif ($newStatus == 'FINISH') {
-            // Check-out automatically when status changes to 'FINISH'
+
             $updateData['check_out'] = Carbon::now();
         } elseif ($newStatus == 'TO DO') {
-            // Reset check-in and check-out times if status is reverted to 'TO DO'
+
             $updateData['check_in'] = null;
             $updateData['check_out'] = null;
         }

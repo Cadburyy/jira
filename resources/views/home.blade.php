@@ -209,7 +209,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    // These variables will be defined once the accordion is opened.
+
     let ticketStatusChart, dandoriManChart, resolutionChart;
 
     const ticketStatusChartData = {
@@ -359,15 +359,15 @@
             const today = new Date();
             today.setHours(0, 0, 0, 0);
 
-            // Iterate through the last 7 days, including today
+
             for (let i = 6; i >= 0; i--) {
                 const date = new Date();
                 date.setDate(today.getDate() - i);
                 const dateString = date.toISOString().slice(0, 10);
                 
-                // Use the correct date format for the label
+
                 labels.push(date.toLocaleDateString('id-ID', {weekday: 'short', day: '2-digit', month: '2-digit'}));
-                // Get the count from the pre-rendered PHP data, or 0 if it doesn't exist
+
                 data.push(dailyTicketCounts[dateString] ?? 0);
             }
             
@@ -451,7 +451,6 @@
             document.getElementById('monthlyBtn').classList.add('btn-primary');
         });
 
-        // Initialize charts when the accordion is shown
         chartCollapse.addEventListener('shown.bs.collapse', () => {
             createTicketStatusChart();
             createDandoriManChart();

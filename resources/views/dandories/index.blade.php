@@ -246,20 +246,19 @@
         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
         let sortDirection = {
-            'ddcnk_id': 'asc' // Initialize the sort direction to ascending
+            'ddcnk_id': 'asc'
         };
         const activeSortArrow = document.getElementById('active-sort-arrow');
         const finishedSortArrow = document.getElementById('finished-sort-arrow');
 
         function updateSortArrow(arrowElement, direction) {
             if (direction === 'asc') {
-                arrowElement.innerHTML = '&#9650;'; // Up arrow
+                arrowElement.innerHTML = '&#9650;';
             } else {
-                arrowElement.innerHTML = '&#9660;'; // Down arrow
+                arrowElement.innerHTML = '&#9660;';
             }
         }
         
-        // Initial arrow setup on page load
         updateSortArrow(activeSortArrow, sortDirection['ddcnk_id']);
         updateSortArrow(finishedSortArrow, sortDirection['ddcnk_id']);
 
