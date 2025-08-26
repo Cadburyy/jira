@@ -10,9 +10,6 @@ use Carbon\Carbon;
 
 class DandoryController extends Controller
 {
-    /**
-     * Set up middleware for permissions based on new roles.
-     */
     public function __construct()
     {
 
@@ -23,9 +20,6 @@ class DandoryController extends Controller
         $this->middleware('permission:dandory-delete', ['only' => ['destroy']]);
     }
 
-    /**
-     * Display a listing of the resource based on user role.
-     */
     public function index()
     {
         $user = Auth::user();
@@ -58,17 +52,11 @@ class DandoryController extends Controller
         ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
         return view('dandories.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         $validatedData = $request->validate([
@@ -96,9 +84,6 @@ class DandoryController extends Controller
         return redirect()->route('dandories.index')->with('success', 'Dandory ticket created successfully!');
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(Dandory $dandory)
     {
         $user = Auth::user();
@@ -108,9 +93,6 @@ class DandoryController extends Controller
         return view('dandories.show', compact('dandory'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(Dandory $dandory)
     {
         $user = Auth::user();
@@ -124,9 +106,6 @@ class DandoryController extends Controller
         return view('dandories.edit', compact('dandory', 'teknisiUsers'));
     }
 
-    /**
-     * Update the specified resource in storage. Only for Admin.
-     */
     public function update(Request $request, Dandory $dandory)
     {
         if (!Auth::user()->hasRole('Admin')) {
@@ -153,9 +132,6 @@ class DandoryController extends Controller
         return redirect()->route('dandories.show', $dandory)->with('success', 'Dandory ticket updated successfully!');
     }
 
-    /**
-     * Update only the status of the specified resource.
-     */
     public function updateStatus(Request $request, Dandory $dandory)
     {
         $request->validate([
@@ -188,9 +164,6 @@ class DandoryController extends Controller
         return response()->json(['success' => true, 'message' => 'Status updated successfully.']);
     }
 
-    /**
-     * Update only the planning fields for a Teknisi.
-     */
     public function updatePlanning(Request $request, Dandory $dandory)
     {
         $request->validate([
@@ -209,10 +182,7 @@ class DandoryController extends Controller
         
         return response()->json(['success' => true, 'message' => 'Planning setting updated successfully.']);
     }
-    
-    /**
-     * Assign a ticket to a Teknisi. Only for Admin.
-     */
+
     public function assign(Request $request, Dandory $dandory)
     {
         if (!Auth::user()->hasRole('Admin')) {
@@ -228,9 +198,6 @@ class DandoryController extends Controller
         return response()->json(['success' => true, 'message' => 'Ticket assigned successfully.']);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Dandory $dandory)
     {
         $dandory->delete();
