@@ -10,14 +10,32 @@ use Hash;
 use Illuminate\Support\Arr;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class UserController extends Controller
 {
     public function index(Request $request): View
     {
-        $data = User::latest()->paginate(5);
-        return view('users.index', compact('data'))
-            ->with('i', ($request->input('page', 1) - 1) * 5);
+        $roleOrder = ['Admin' => 1, 'Requestor' => 2, 'Teknisi' => 3];
+
+        $users = User::all()->sortBy(function ($user) use ($roleOrder) {
+            $userRole = $user->getRoleNames()->first();
+            return $roleOrder[$userRole] ?? 99;
+        });
+
+        $perPage = 10;
+        $currentPage = LengthAwarePaginator::resolveCurrentPage();
+        $currentItems = $users->slice(($currentPage - 1) * $perPage, $perPage)->values();
+
+        $data = new LengthAwarePaginator(
+            $currentItems,
+            $users->count(),
+            $perPage,
+            $currentPage,
+            ['path' => $request->url()]
+        );
+        
+        return view('users.index', compact('data'));
     }
 
     public function create(): View

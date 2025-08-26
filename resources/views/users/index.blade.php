@@ -21,7 +21,7 @@
         <table class="table table-bordered table-hover">
             <thead class="bg-light">
                 <tr>
-                    <th width="100px">No</th>
+                    <th width="100px">No.</th>
                     <th>Name</th>
                     <th>Email</th>
                     <th>Roles</th>
@@ -29,9 +29,9 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach ($data as $key => $user)
+                @foreach ($data as $user)
                 <tr>
-                    <td>{{ ++$i }}</td>
+                    <td>{{ ($data->currentPage() - 1) * $data->perPage() + $loop->iteration }}</td>
                     <td>{{ $user->name }}</td>
                     <td>{{ $user->email }}</td>
                     <td>

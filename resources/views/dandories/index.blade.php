@@ -2,22 +2,22 @@
 
 @section('content')
 <style>
-    /* CSS for status cell coloring */
     .status-cell[data-status="TO DO"] {
-        background-color: #f8d7da; /* Light Red */
+        background-color: #f8d7da;
     }
     .status-cell[data-status="IN PROGRESS"] {
-        background-color: #fff3cd; /* Light Yellow */
+        background-color: #fff3cd;
     }
     .status-cell[data-status="FINISH"] {
-        background-color: #d1e7dd; /* Light Green */
+        background-color: #d1e7dd;
     }
     .status-cell[data-status="PENDING"] {
-        background-color: #e2e3e5; /* Light Grey */
+        background-color: #e2e3e5;
     }
     .sort-arrow {
         margin-left: 5px;
         cursor: pointer;
+        user-select: none;
     }
 </style>
 
@@ -32,7 +32,6 @@
     </div>
 </div>
 
-{{-- Message container for AJAX responses --}}
 <div id="message-container" class="my-3"></div>
 
     <div class="d-flex justify-content-center my-3">
@@ -40,7 +39,6 @@
         <button id="showFinishedBtn" class="btn btn-secondary mx-2">Finished Tickets</button>
     </div>
 
-{{-- Container for Active Tickets table --}}
 <div id="active-tickets-container">
     <h3 class="mt-4">Active Tickets (TO DO, IN PROGRESS & PENDING)</h3>
     <div class="table-responsive">
@@ -49,7 +47,7 @@
                 <tr>
                     <th class="sortable-header" data-sort-by="ddcnk_id">
                         Key
-                        <span class="sort-arrow" id="active-sort-arrow">&#9660;</span>
+                        <span class="sort-arrow" id="active-sort-arrow">&#9650;</span>
                     </th>
                     <th>Line Produksi</th>
                     <th>Requestor</th>
@@ -138,7 +136,6 @@
     </div>
 </div>
 
-{{-- Container for Finished Tickets table (hidden by default) --}}
 <div id="finished-tickets-container" style="display: none;">
     <h3 class="mt-4">Finished Tickets</h3>
     <div class="table-responsive">
@@ -147,7 +144,7 @@
                 <tr>
                     <th class="sortable-header" data-sort-by="ddcnk_id">
                         Key
-                        <span class="sort-arrow" id="finished-sort-arrow">&#9660;</span>
+                        <span class="sort-arrow" id="finished-sort-arrow">&#9650;</span>
                     </th>
                     <th>Line Produksi</th>
                     <th>Requestor</th>
@@ -259,10 +256,6 @@
             }
         }
         
-        updateSortArrow(activeSortArrow, sortDirection['ddcnk_id']);
-        updateSortArrow(finishedSortArrow, sortDirection['ddcnk_id']);
-
-
         function showMessage(type, message) {
             const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
             messageContainer.innerHTML = `
@@ -291,14 +284,17 @@
             showActiveBtn.classList.add('btn-secondary');
         }
 
-        function sortTable(tableId, sortColumn) {
+        function sortTable(tableId, sortColumn, initialSort = false) {
             const table = document.getElementById(tableId).querySelector('table');
             const tbody = table.querySelector('tbody');
             const rows = Array.from(tbody.querySelectorAll('tr'));
             const arrowElement = tableId === 'active-tickets-container' ? activeSortArrow : finishedSortArrow;
 
-            const direction = sortDirection[sortColumn] === 'asc' ? 'desc' : 'asc';
-            sortDirection[sortColumn] = direction;
+            if (!initialSort) {
+                const currentDirection = sortDirection[sortColumn];
+                sortDirection[sortColumn] = currentDirection === 'asc' ? 'desc' : 'asc';
+            }
+            const direction = sortDirection[sortColumn];
             updateSortArrow(arrowElement, direction);
 
             rows.sort((a, b) => {
@@ -326,7 +322,6 @@
         showFinishedBtn.addEventListener('click', showFinishedTickets);
         showActiveTickets();
         
-        // Handle all form submissions with a single handler
         document.querySelectorAll('form.update-form select').forEach(element => {
             element.addEventListener('change', function(e) {
                 submitForm(element.closest('form'));
@@ -340,6 +335,9 @@
                 sortTable(tableContainer.id, sortColumn);
             });
         });
+
+        sortTable('active-tickets-container', 'ddcnk_id', true);
+        sortTable('finished-tickets-container', 'ddcnk_id', true);
 
         async function submitForm(form) {
             const formData = new FormData(form);
