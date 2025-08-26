@@ -27,9 +27,7 @@ return new class extends Migration
             $table->dateTime('check_in')->nullable();
             $table->dateTime('check_out')->nullable();
             $table->text('notes')->nullable();
-            // This column now correctly identifies the 'teknisi' to whom the ticket is assigned.
             $table->foreignId('assigned_to')->nullable()->constrained('users')->onDelete('set null'); 
-            // This column serves as the 'requestor' and is linked to the user who created the ticket.
             $table->foreignId('added_by')->constrained('users')->onDelete('cascade');
             $table->timestamps();
         });
