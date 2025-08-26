@@ -10,30 +10,30 @@
 @endphp
 <style>
     body, html {
-        overflow-x: hidden; /* Hide horizontal scrollbars */
-        overflow-y: auto; /* Allow vertical scroll if needed */
-        background-color: #f8f9fa; /* A light grey background for a clean look */
+        overflow-x: hidden;
+        overflow-y: auto;
+        background-color: #f8f9fa;
     }
     .card-link-hover:hover .card {
-        transform: translateY(-5px); /* Lift card slightly */
-        box-shadow: 0 10px 20px rgba(0,0,0,0.15) !important; /* Stronger shadow on hover */
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.15) !important;
         transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
     }
     .card-link-hover .card {
         transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
     }
     .card {
-        border-radius: 1rem; /* Rounded corners for the cards */
+        border-radius: 1rem;
         border: none;
     }
     .card-header {
-        background-color: #fff; /* White background for card headers */
+        background-color: #fff;
         border-bottom: 1px solid #e9ecef;
         border-top-left-radius: 1rem;
         border-top-right-radius: 1rem;
     }
     .text-primary-dark {
-        color: #0056b3; /* A darker shade of blue for icons */
+        color: #0056b3;
     }
     .accordion-button:not(.collapsed) .fa-chevron-down {
         transform: rotate(180deg);
@@ -58,14 +58,12 @@
     }
 </style>
 
-{{-- The main container is now a standard container with top padding to position it at the top --}}
 <div class="container py-5">
     <h2 class="text-center mb-4 text-dark font-weight-bold">Welcome, {{ $user->name }} 👋</h2>
     
-    {{-- The row for the cards remains centered horizontally --}}
     <div class="row row-cols-1 row-cols-md-3 g-4 justify-content-center mt-4">
 
-        {{-- Card for 'Manage Users' --}}
+        {{-- Card for Manage Users --}}
         @if($isAdmin)
         <div class="col-md-4">
             <a href="{{ route('users.index') }}" class="text-decoration-none card-link-hover">
@@ -80,7 +78,7 @@
         </div>
         @endif
 
-        {{-- Card for 'Manage Roles' --}}
+        {{-- Card for Manage Roles --}}
         @if($isAdmin)
         <div class="col-md-4">
             <a href="{{ route('roles.index') }}" class="text-decoration-none card-link-hover">
@@ -95,13 +93,13 @@
         </div>
         @endif
         
-        {{-- Card for 'Dandory Tickets' (visible to Admin, Requestor, and Teknisi) --}}
+        {{-- Card for Dandory Tickets --}}
         @if($isAdmin || $isRequestor || $isTeknisi)
         <div class="col-md-4">
             <a href="{{ route('dandories.index') }}" class="text-decoration-none card-link-hover">
                 <div class="card h-100 text-center shadow-sm p-4">
                     <div class="card-body d-flex flex-column justify-content-center align-items-center">
-                        <i class="fas fa-clipboard-list fa-3x mb-3 text-info"></i> {{-- Changed icon for better representation --}}
+                        <i class="fas fa-clipboard-list fa-3x mb-3 text-info"></i>
                         <h5 class="card-title text-dark">Dandory Tickets</h5>
                         <p class="card-text text-muted">View and manage your dandory tickets.</p>
                     </div>
@@ -111,7 +109,6 @@
         @endif
     </div>
 
-    {{-- Display logged-in status message below the cards --}}
     @if (session('status'))
         <div class="alert alert-success text-center mt-5" role="alert">
             {{ session('status') }}
@@ -147,7 +144,7 @@
                                         <ul class="list-unstyled mt-3 w-75">
                                             @foreach($ticketStatusChartData['labels'] as $key => $label)
                                                 <li>
-                                                    <span style="display: inline-block; width: 10px; height: 10px; background-color: {{ $ticketStatusChartData['colors'][$key] }}; margin-right: 5px; border-radius: 50%;"></span>
+                                                    <span style="display:inline-block;width:10px;height:10px;background-color:{{ $ticketStatusChartData['colors'][$key] }};margin-right:5px;border-radius:50%;"></span>
                                                     {{ $label }}: {{ $ticketStatusChartData['data'][$key] }}
                                                 </li>
                                             @endforeach
@@ -169,7 +166,7 @@
                                         <ul class="list-unstyled mt-3 w-75">
                                             @foreach($dandoriManChartData['labels'] as $key => $label)
                                                 <li>
-                                                    <span style="display: inline-block; width: 10px; height: 10px; background-color: {{ $dandoriManChartData['colors'][$key] }}; margin-right: 5px; border-radius: 50%;"></span>
+                                                    <span style="display:inline-block;width:10px;height:10px;background-color:{{ $dandoriManChartData['colors'][$key] }};margin-right:5px;border-radius:50%;"></span>
                                                     {{ $label }}: {{ $dandoriManChartData['data'][$key] }}
                                                 </li>
                                             @endforeach
@@ -178,7 +175,7 @@
                                 </div>
                             </div>
                             
-                            {{-- Chart 3: Average Daily Tickets per Week --}}
+                            {{-- Chart 3: Daily, Weekly, Monthly --}}
                             <div class="col-md-4 mb-4">
                                 <div class="card shadow-sm p-3">
                                     <div class="card-header text-center">
@@ -209,7 +206,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-
     let ticketStatusChart, dandoriManChart, resolutionChart;
 
     const ticketStatusChartData = {
@@ -238,69 +234,64 @@
     document.addEventListener('DOMContentLoaded', function() {
         const chartCollapse = document.getElementById('chartCollapse');
         const legendContainer = document.getElementById('resolution-legend');
+        const dailyBtn = document.getElementById('dailyBtn');
+        const weeklyBtn = document.getElementById('weeklyBtn');
+        const monthlyBtn = document.getElementById('monthlyBtn');
+        const allButtons = [dailyBtn, weeklyBtn, monthlyBtn];
+
+        function setActiveButton(activeButton) {
+            allButtons.forEach(btn => {
+                btn.classList.remove('btn-primary');
+                btn.classList.add('btn-secondary');
+            });
+            activeButton.classList.remove('btn-secondary');
+            activeButton.classList.add('btn-primary');
+        }
+
+        function tooltipWithPercentage(context) {
+            const dataset = context.dataset.data;
+            const total = dataset.reduce((a, b) => a + b, 0);
+            const value = context.raw;
+            const percentage = total > 0 ? ((value / total) * 100).toFixed(2) : 0;
+            return `${context.label}: ${value} (${percentage}%)`;
+        }
 
         function createTicketStatusChart() {
-            if (ticketStatusChart) {
-                ticketStatusChart.destroy();
-            }
-            const ticketStatusCtx = document.getElementById('ticketStatusChart').getContext('2d');
-            ticketStatusChart = new Chart(ticketStatusCtx, {
+            if (ticketStatusChart) ticketStatusChart.destroy();
+            const ctx = document.getElementById('ticketStatusChart').getContext('2d');
+            ticketStatusChart = new Chart(ctx, {
                 type: 'doughnut',
                 data: ticketStatusChartData,
                 options: {
-                    responsive: true,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    const label = context.label || '';
-                                    const value = context.parsed;
-                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                    const percentage = total > 0 ? ((value / total) * 100).toFixed(2) + '%' : '0%';
-                                    return `${label}: ${value} (${percentage})`;
-                                }
-                            }
-                        }
+                    responsive:true,
+                    plugins:{
+                        legend:{display:false},
+                        tooltip:{callbacks:{label:tooltipWithPercentage}}
                     }
                 }
             });
         }
 
         function createDandoriManChart() {
-            if (dandoriManChart) {
-                dandoriManChart.destroy();
-            }
-            const dandoriManCtx = document.getElementById('dandoriManChart').getContext('2d');
-            dandoriManChart = new Chart(dandoriManCtx, {
+            if (dandoriManChart) dandoriManChart.destroy();
+            const ctx = document.getElementById('dandoriManChart').getContext('2d');
+            dandoriManChart = new Chart(ctx, {
                 type: 'doughnut',
                 data: dandoriManChartData,
                 options: {
-                    responsive: true,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    const label = context.label || '';
-                                    const value = context.parsed;
-                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                    const percentage = total > 0 ? ((value / total) * 100).toFixed(2) + '%' : '0%';
-                                    return `${label}: ${value} (${percentage})`;
-                                }
-                            }
-                        }
+                    responsive:true,
+                    plugins:{
+                        legend:{display:false},
+                        tooltip:{callbacks:{label:tooltipWithPercentage}}
                     }
                 }
             });
         }
 
-        function createResolutionChart(type, data, labels, colors, yAxisText, chartLabel) {
-            if (resolutionChart) {
-                resolutionChart.destroy();
-            }
-            const resolutionChartCtx = document.getElementById('resolutionChart').getContext('2d');
-            resolutionChart = new Chart(resolutionChartCtx, {
+        function createResolutionChart(type, data, labels, colors, chartLabel) {
+            if (resolutionChart) resolutionChart.destroy();
+            const ctx = document.getElementById('resolutionChart').getContext('2d');
+            resolutionChart = new Chart(ctx, {
                 type: type,
                 data: {
                     labels: labels,
@@ -317,144 +308,99 @@
                     scales: {
                         y: {
                             beginAtZero: true,
-                            title: {
-                                display: true,
-                                text: yAxisText
-                            },
-                            ticks: { precision: 0 }
+                            ticks: {
+                                precision: 0
+                            }
                         }
                     },
                     plugins: {
-                        legend: { display: false },
+                        legend: {
+                            display: false
+                        },
                         tooltip: {
                             callbacks: {
-                                label: function(context) {
-                                    return `${context.dataset.label}: ${context.raw}`;
-                                }
+                                label: tooltipWithPercentage
                             }
                         }
                     }
                 }
             });
-            updateLegend(labels, data, colors, chartLabel);
+            updateLegend(labels, data, colors);
         }
 
-        function updateLegend(labels, data, colors, chartLabel) {
-            legendContainer.innerHTML = '';
-            labels.forEach((label, index) => {
-                const li = document.createElement('li');
-                const legendText = `${label}: ${data[index]} tickets`;
-                
-                li.innerHTML = `
-                    <span style="display: inline-block; width: 10px; height: 10px; background-color: ${colors[index]}; margin-right: 5px; border-radius: 50%;"></span>
-                    ${legendText}
-                `;
-                legendContainer.appendChild(li);
+        function updateLegend(labels, data, colors){
+            legendContainer.innerHTML='';
+            labels.forEach((label,index)=>{
+                legendContainer.innerHTML += `<li><span style="display:inline-block;width:10px;height:10px;background-color:${colors[index]};margin-right:5px;border-radius:50%;"></span>${label}: ${data[index]} tickets</li>`;
             });
         }
 
-        function filterDaily() {
-            const labels = [];
-            const data = [];
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-
-
-            for (let i = 6; i >= 0; i--) {
-                const date = new Date();
-                date.setDate(today.getDate() - i);
-                const dateString = date.toISOString().slice(0, 10);
-                
-
-                labels.push(date.toLocaleDateString('id-ID', {weekday: 'short', day: '2-digit', month: '2-digit'}));
-
-                data.push(dailyTicketCounts[dateString] ?? 0);
+        function filterDaily(){
+            const labels=[],data=[];
+            const today=new Date();today.setHours(0,0,0,0);
+            for(let i=6;i>=0;i--){
+                const d=new Date();d.setDate(today.getDate()-i);
+                const key=d.toISOString().slice(0,10);
+                labels.push(d.toLocaleDateString('id-ID',{weekday:'short',day:'2-digit',month:'2-digit'}));
+                data.push(dailyTicketCounts[key]??0);
             }
-            
-            createResolutionChart('bar', data, labels, chartColors.slice(0, 7), 'Total Tickets', 'Daily Tickets');
+            createResolutionChart('bar',data,labels,chartColors.slice(0,7),'Daily Tickets');
         }
 
-        function filterWeekly() {
-            const weeklyData = [];
-            const weeklyLabels = [];
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
+        function filterWeekly(){
+            const weeklyData=[],weeklyLabels=[];
+            const today=new Date();today.setHours(0,0,0,0);
+            for(let i=3;i>=0;i--){
+                const endDate=new Date(today);
+                endDate.setDate(today.getDate()-(7*(3-i)));
+                const startDate=new Date(endDate);
+                startDate.setDate(endDate.getDate()-6);
 
-            for (let i = 3; i >= 0; i--) {
-                const endDate = new Date(today);
-                endDate.setDate(today.getDate() - (7 * (3-i)));
-                const startDate = new Date(endDate);
-                startDate.setDate(endDate.getDate() - 6);
-
-                const label = `Week ${i + 1} (${startDate.toLocaleDateString('id-ID', {day: '2-digit', month: '2-digit'})} - ${endDate.toLocaleDateString('id-ID', {day: '2-digit', month: '2-digit'})})`;
+                const label=`Week ${i+1} (${startDate.toLocaleDateString('id-ID',{day:'2-digit',month:'2-digit'})} - ${endDate.toLocaleDateString('id-ID',{day:'2-digit',month:'2-digit'})})`;
                 weeklyLabels.unshift(label);
 
-                let totalCount = 0;
-                const dailyData = Object.entries(dailyTicketCounts);
-                for(const [date, count] of dailyData) {
-                    const ticketDate = new Date(date);
-                    if (ticketDate >= startDate && ticketDate <= endDate) {
-                        totalCount += count;
-                    }
+                let total=0;
+                for(const [date,count] of Object.entries(dailyTicketCounts)){
+                    const [y,m,d]=date.split('-');
+                    const ticketDate=new Date(y,m-1,d);
+                    if(ticketDate>=startDate && ticketDate<=endDate) total+=count;
                 }
-                weeklyData.unshift(totalCount);
+                weeklyData.unshift(total);
             }
-            const weeklyColors = chartColors.slice(0, 4);
-            createResolutionChart('bar', weeklyData, weeklyLabels, weeklyColors, 'Total Tickets', 'Weekly Tickets');
+            createResolutionChart('bar',weeklyData,weeklyLabels,chartColors.slice(0,4),'Weekly Tickets');
         }
 
-        function filterMonthly() {
-            const labels = [];
-            const data = [];
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-
-            for(let i = 11; i >= 0; i--) {
-                const month = new Date(today);
-                month.setMonth(today.getMonth() - i);
-                const monthString = month.toISOString().slice(0, 7);
-                
-                labels.push(month.toLocaleDateString('id-ID', {month: 'long', year: 'numeric'}));
-                data.push(monthlyTicketCounts[monthString] ?? 0);
+        function filterMonthly(){
+            const labels=[],data=[];
+            const today=new Date();today.setHours(0,0,0,0);
+            for(let i=11;i>=0;i--){
+                const month=new Date(today);
+                month.setMonth(today.getMonth()-i);
+                const key=month.toISOString().slice(0,7);
+                labels.push(month.toLocaleDateString('id-ID',{month:'long',year:'numeric'}));
+                data.push(monthlyTicketCounts[key]??0);
             }
-
-            createResolutionChart('bar', data, labels, monthlyColors, 'Total Tickets', 'Monthly Tickets');
+            createResolutionChart('bar',data,labels,monthlyColors,'Monthly Tickets');
         }
 
-        document.getElementById('dailyBtn').addEventListener('click', () => {
+        dailyBtn.addEventListener('click', () => {
+            setActiveButton(dailyBtn);
             filterDaily();
-            document.getElementById('dailyBtn').classList.remove('btn-secondary');
-            document.getElementById('dailyBtn').classList.add('btn-primary');
-            document.getElementById('weeklyBtn').classList.remove('btn-primary');
-            document.getElementById('weeklyBtn').classList.add('btn-secondary');
-            document.getElementById('monthlyBtn').classList.remove('btn-primary');
-            document.getElementById('monthlyBtn').classList.add('btn-secondary');
         });
-
-        document.getElementById('weeklyBtn').addEventListener('click', () => {
+        weeklyBtn.addEventListener('click', () => {
+            setActiveButton(weeklyBtn);
             filterWeekly();
-            document.getElementById('dailyBtn').classList.remove('btn-primary');
-            document.getElementById('dailyBtn').classList.add('btn-secondary');
-            document.getElementById('weeklyBtn').classList.remove('btn-secondary');
-            document.getElementById('weeklyBtn').classList.add('btn-primary');
-            document.getElementById('monthlyBtn').classList.remove('btn-primary');
-            document.getElementById('monthlyBtn').classList.add('btn-secondary');
         });
-
-        document.getElementById('monthlyBtn').addEventListener('click', () => {
+        monthlyBtn.addEventListener('click', () => {
+            setActiveButton(monthlyBtn);
             filterMonthly();
-            document.getElementById('dailyBtn').classList.remove('btn-primary');
-            document.getElementById('dailyBtn').classList.add('btn-secondary');
-            document.getElementById('weeklyBtn').classList.remove('btn-primary');
-            document.getElementById('weeklyBtn').classList.add('btn-secondary');
-            document.getElementById('monthlyBtn').classList.remove('btn-secondary');
-            document.getElementById('monthlyBtn').classList.add('btn-primary');
         });
 
         chartCollapse.addEventListener('shown.bs.collapse', () => {
             createTicketStatusChart();
             createDandoriManChart();
             filterDaily();
+            setActiveButton(dailyBtn);
         });
     });
 </script>
