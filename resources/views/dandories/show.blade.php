@@ -29,6 +29,8 @@
             {{ session('success') }}
         </div>
     @endif
+    
+    <div id="message-container" class="my-3"></div>
 
     <div class="row g-4 mt-3">
         {{-- Ticket Details Card --}}
@@ -102,7 +104,16 @@
                     </div>
                     <div class="col-12 mb-3">
                         <strong>Notes:</strong><br>
-                        {{ $dandory->notes }}
+                        @if (Auth::user()->hasRole('Admin') || (Auth::user()->hasRole('Teknisi') && $dandory->status == 'PENDING' && $dandory->assigned_to == Auth::id()))
+                            <form action="{{ route('dandories.updateNotes', $dandory->id) }}" method="POST" id="notes-form">
+                                @csrf
+                                @method('PUT')
+                                <textarea name="notes" class="form-control" rows="3">{{ $dandory->notes }}</textarea>
+                                <button type="submit" class="btn btn-success btn-sm mt-2">Save Notes</button>
+                            </form>
+                        @else
+                            {{ $dandory->notes }}
+                        @endif
                     </div>
                 </div>
             </div>

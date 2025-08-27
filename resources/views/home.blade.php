@@ -261,13 +261,11 @@
         const weeklyBtn = document.getElementById('weeklyBtn');
         const monthlyBtn = document.getElementById('monthlyBtn');
         const allButtons = [dailyBtn, weeklyBtn, monthlyBtn];
-        
-        // Add date picker elements
+
         const dailyFilterContainer = document.getElementById('daily-filter-container');
         const startDateInput = document.getElementById('start-date');
         const endDateInput = document.getElementById('end-date');
-        
-        // Set date picker defaults
+
         const today = new Date();
         const thirtyDaysAgo = new Date();
         thirtyDaysAgo.setDate(today.getDate() - 29);

@@ -12,10 +12,9 @@ class DandoryController extends Controller
 {
     public function __construct()
     {
-
         date_default_timezone_set('Asia/Jakarta');
 
-        $this->middleware('permission:dandory-list|dandory-create|dandory-edit|dandory-delete', ['only' => ['index', 'show']]);
+        $this->middleware('permission:dandory-list|dandory-create|dandory-edit', ['only' => ['index', 'show']]);
         $this->middleware('permission:dandory-create', ['only' => ['create', 'store']]);
         $this->middleware('permission:dandory-delete', ['only' => ['destroy']]);
     }
@@ -148,13 +147,10 @@ class DandoryController extends Controller
         $updateData = ['status' => $newStatus];
 
         if ($newStatus == 'IN PROGRESS') {
-
             $updateData['check_in'] = Carbon::now();
         } elseif ($newStatus == 'FINISH') {
-
             $updateData['check_out'] = Carbon::now();
         } elseif ($newStatus == 'TO DO') {
-
             $updateData['check_in'] = null;
             $updateData['check_out'] = null;
         }
@@ -181,6 +177,26 @@ class DandoryController extends Controller
         $dandory->update([$field => $value]);
         
         return response()->json(['success' => true, 'message' => 'Planning setting updated successfully.']);
+    }
+
+    // New method for updating notes
+    public function updateNotes(Request $request, Dandory $dandory)
+    {
+        $user = Auth::user();
+
+        // Check for permission and ticket status
+        if ($user->hasRole('Admin') || ($user->hasRole('Teknisi') && $dandory->status == 'PENDING' && $dandory->assigned_to == $user->id)) {
+            $validatedData = $request->validate([
+                'notes' => 'nullable|string',
+            ]);
+
+            $dandory->update($validatedData);
+            
+            return redirect()->route('dandories.show', $dandory)->with('success', 'Notes updated successfully!');
+        }
+
+        // Abort if the user does not have permission
+        abort(403, 'You do not have permission to update notes on this ticket.');
     }
 
     public function assign(Request $request, Dandory $dandory)

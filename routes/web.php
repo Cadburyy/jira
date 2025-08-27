@@ -27,4 +27,5 @@ Route::middleware(['auth'])->group(function () {
     Route::put('dandories/{dandory}/status', [DandoryController::class, 'updateStatus'])->name('dandories.updateStatus');
     Route::put('dandories/{dandory}/planning', [DandoryController::class, 'updatePlanning'])->name('dandories.updatePlanning');
     Route::put('dandories/{dandory}/assign', [DandoryController::class, 'assign'])->name('dandories.assign');
+    Route::put('dandories/{dandory}/update-notes', [DandoryController::class, 'updateNotes'])->name('dandories.updateNotes');
 });
