@@ -29,7 +29,6 @@ class HomeController extends Controller
      */
     public function index()
     {
-
         $ticketStatusData = Dandory::select('status', DB::raw('count(*) as count'))
             ->groupBy('status')
             ->pluck('count', 'status')
@@ -88,5 +87,36 @@ class HomeController extends Controller
             ->pluck('count', 'month');
 
         return view('home', compact('ticketStatusChartData', 'dandoriManChartData', 'dailyTicketCounts', 'monthlyTicketCounts'));
+    }
+
+    /**
+     * Get a list of all dandori tickets to be displayed on the dashboard for the 'Views' role.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getDandoriTicketsData()
+    {
+        $dandories = Dandory::all();
+        $tickets = $dandories->map(function ($dandory) {
+            $requestor = User::find($dandory->added_by);
+            $assignedTo = User::find($dandory->assigned_to);
+
+            return [
+                'ddcnk_id' => $dandory->ddcnk_id,
+                'line_production' => $dandory->line_production,
+                'requestor' => $requestor ? $requestor->name : 'N/A',
+                'customer' => $dandory->customer,
+                'nama_part' => $dandory->nama_part,
+                'nomor_part' => $dandory->nomor_part,
+                'proses' => $dandory->proses,
+                'mesin' => $dandory->mesin,
+                'qty_pcs' => $dandory->qty_pcs,
+                'planning_shift' => $dandory->planning_shift,
+                'status' => $dandory->status,
+                'assigned_to_name' => $assignedTo ? $assignedTo->name : 'N/A',
+            ];
+        });
+
+        return response()->json($tickets);
     }
 }

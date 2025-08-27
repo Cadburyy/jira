@@ -17,6 +17,7 @@ Route::get('/', function () {
 Auth::routes();
 
 Route::get('/home', [HomeController::class, 'index'])->name('home');
+Route::get('/home/dandories/data', [HomeController::class, 'getDandoriTicketsData'])->name('home.dandories.data');
 
 Route::middleware(['auth'])->group(function () {
     Route::resource('roles', RoleController::class);

@@ -65,16 +65,24 @@
                                 $isAdmin = $user->hasRole('Admin');
                                 $isRequestor = $user->hasRole('Requestor');
                                 $isTeknisi = $user->hasRole('Teknisi');
+                                $isView = $user->hasRole('Views');
                             @endphp
 
-                            {{-- Admin Links --}}
-                            @if($isAdmin)
-                                <li><a class="nav-link" href="{{ route('users.index') }}">Manage Users</a></li>
-                                <li><a class="nav-link" href="{{ route('roles.index') }}">Manage Role</a></li>
+                            {{-- "Home" is the only nav link for the "Views" role --}}
+                            @if($isView)
+                                <li><a class="nav-link" href="{{ route('home') }}">Home</a></li>
                             @endif
-                            
-                            {{-- Visible to all roles with a need to see tickets --}}
+
+                            {{-- Links for other roles --}}
                             @if($isAdmin || $isRequestor || $isTeknisi)
+                                <li><a class="nav-link" href="{{ route('home') }}">Home</a></li>
+                                {{-- Admin Links --}}
+                                @if($isAdmin)
+                                    <li><a class="nav-link" href="{{ route('users.index') }}">Manage Users</a></li>
+                                    <li><a class="nav-link" href="{{ route('roles.index') }}">Manage Role</a></li>
+                                @endif
+                                
+                                {{-- Visible to all roles with a need to see tickets --}}
                                 <li><a class="nav-link" href="{{ route('dandories.index') }}">Dandory Tickets</a></li>
                             @endif
 

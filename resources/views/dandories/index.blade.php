@@ -2,22 +2,28 @@
 
 @section('content')
 <style>
-    .status-cell[data-status="TO DO"] {
-        background-color: #f8d7da;
+    /* Change the CSS to apply colors to the entire row */
+    tr[data-status="TO DO"] {
+        background-color: #f8d7da !important;
     }
-    .status-cell[data-status="IN PROGRESS"] {
-        background-color: #fff3cd;
+    tr[data-status="IN PROGRESS"] {
+        background-color: #fff3cd !important;
     }
-    .status-cell[data-status="FINISH"] {
-        background-color: #d1e7dd;
+    tr[data-status="FINISH"] {
+        background-color: #d1e7dd !important;
     }
-    .status-cell[data-status="PENDING"] {
-        background-color: #e2e3e5;
+    tr[data-status="PENDING"] {
+        background-color: #e2e3e5 !important;
     }
     .sort-arrow {
         margin-left: 5px;
         cursor: pointer;
         user-select: none;
+    }
+
+    /* Fix to ensure the table cells inherit the row's color */
+    tr[data-status] td {
+        background-color: inherit;
     }
 </style>
 
@@ -65,7 +71,8 @@
             </thead>
             <tbody>
                 @foreach ($activeDandories as $dandory)
-                <tr data-ticket-id="{{ $dandory->id }}">
+                {{-- Add the data-status attribute directly to the table row --}}
+                <tr data-ticket-id="{{ $dandory->id }}" data-status="{{ $dandory->status }}">
                     <td>{{ $dandory->ddcnk_id }}</td>
                     <td>{{ $dandory->line_production }}</td>
                     <td>{{ App\Models\User::find($dandory->added_by)->name }}</td>
@@ -76,7 +83,7 @@
                     <td>{{ $dandory->mesin }}</td>
                     <td>{{ $dandory->qty_pcs }}</td>
                     <td>{{ $dandory->planning_shift }}</td>
-                    <td class="status-cell" data-status="{{ $dandory->status }}">
+                    <td>
                         @if(Auth::user()->hasRole('Admin') || (Auth::user()->hasRole('Teknisi') && $dandory->assigned_to == Auth::id()))
                             <form action="{{ route('dandories.updateStatus', $dandory->id) }}" method="POST" class="update-form status-form">
                                 @csrf
@@ -162,7 +169,8 @@
             </thead>
             <tbody>
                 @foreach ($finishedDandories as $dandory)
-                <tr data-ticket-id="{{ $dandory->id }}">
+                {{-- Add the data-status attribute directly to the table row --}}
+                <tr data-ticket-id="{{ $dandory->id }}" data-status="{{ $dandory->status }}">
                     <td>{{ $dandory->ddcnk_id }}</td>
                     <td>{{ $dandory->line_production }}</td>
                     <td>{{ App\Models\User::find($dandory->added_by)->name }}</td>
@@ -173,7 +181,105 @@
                     <td>{{ $dandory->mesin }}</td>
                     <td>{{ $dandory->qty_pcs }}</td>
                     <td>{{ $dandory->planning_shift }}</td>
-                    <td class="status-cell" data-status="{{ $dandory->status }}">
+                    <td>
+                        @if(Auth::user()->hasRole('Admin') || (Auth::user()->hasRole('Teknisi') && $dandory->assigned_to == Auth::id()))
+                            <form action="{{ route('dandories.updateStatus', $dandory->id) }}" method="POST" class="update-form status-form">
+                                @csrf
+                                @method('PUT')
+                                <select name="status" class="form-control">
+                                    <option value="TO DO" {{ $dandory->status == 'TO DO' ? 'selected' : '' }}>TO DO</option>
+                                    <option value="IN PROGRESS" {{ $dandory->status == 'IN PROGRESS' ? 'selected' : '' }}>IN PROGRESS</option>
+                                    <option value="PENDING" {{ $dandory->status == 'PENDING' ? 'selected' : '' }}>PENDING</option>
+                                    <option value="FINISH" {{ $dandory->status == 'FINISH' ? 'selected' : '' }}>FINISH</option>
+                                </select>
+                            </form>
+                        @else
+                            {{ $dandory->status }}
+                        @endif
+                    </td>
+                    <td class="assigned-to-cell">
+                        @if(Auth::user()->hasRole('Admin'))
+                            <form action="{{ route('dandories.assign', $dandory->id) }}" method="POST" class="update-form assigned-form">
+                                @csrf
+                                @method('PUT')
+                                <select name="assigned_to" class="form-control">
+                                    <option value="">-- Assign --</option>
+                                    @foreach($users->filter(fn($u) => $u->hasRole('Teknisi')) as $user)
+                                        <option value="{{ $user->id }}" {{ $dandory->assigned_to == $user->id ? 'selected' : '' }}>{{ $user->name }}</option>
+                                    @endforeach
+                                </select>
+                            </form>
+                        @elseif($dandory->assigned_to)
+                            {{ App\Models\User::find($dandory->assigned_to)->name }}
+                        @else
+                            N/A
+                        @endif
+                    </td>
+                    <td>
+                        <form action="{{ route('dandories.destroy',$dandory->id) }}" method="POST">
+                            <a class="btn btn-info btn-sm" href="{{ route('dandories.show',$dandory->id) }}">
+                                <i class="fa-solid fa-list"></i> View
+                            </a>
+                            @can('dandory-edit')
+                                <a class="btn btn-primary btn-sm" href="{{ route('dandories.edit',$dandory->id) }}">
+                                    <i class="fa-solid fa-pen-to-square"></i> Edit
+                                </a>
+                            @endcan
+                            @csrf
+                            @method('DELETE')
+                            @can('dandory-delete')
+                                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')">
+                                    <i class="fa-solid fa-trash"></i> Delete
+                                </button>
+                            @endcan
+                        </form>
+                    </td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div id="finished-tickets-container" style="display: none;">
+    <h3 class="mt-4">Finished Tickets</h3>
+    <div class="table-responsive">
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th class="sortable-header" data-sort-by="ddcnk_id">
+                        Key
+                        <span class="sort-arrow" id="finished-sort-arrow">&#9650;</span>
+                    </th>
+                    <th>Line Produksi</th>
+                    <th>Requestor</th>
+                    <th>Customer</th>
+                    <th>Part Name</th>
+                    <th>Part Number</th>
+                    <th>Process</th>
+                    <th>Machine</th>
+                    <th>Qty PCS</th>
+                    <th>Planning Shift</th>
+                    <th>Status</th>
+                    <th>Assigned To</th>
+                    <th width="280px">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach ($finishedDandories as $dandory)
+                {{-- Add the data-status attribute directly to the table row --}}
+                <tr data-ticket-id="{{ $dandory->id }}" data-status="{{ $dandory->status }}">
+                    <td>{{ $dandory->ddcnk_id }}</td>
+                    <td>{{ $dandory->line_production }}</td>
+                    <td>{{ App\Models\User::find($dandory->added_by)->name }}</td>
+                    <td>{{ $dandory->customer }}</td>
+                    <td>{{ $dandory->nama_part }}</td>
+                    <td>{{ $dandory->nomor_part }}</td>
+                    <td>{{ $dandory->proses }}</td>
+                    <td>{{ $dandory->mesin }}</td>
+                    <td>{{ $dandory->qty_pcs }}</td>
+                    <td>{{ $dandory->planning_shift }}</td>
+                    <td>
                         @if(Auth::user()->hasRole('Admin') || (Auth::user()->hasRole('Teknisi') && $dandory->assigned_to == Auth::id()))
                             <form action="{{ route('dandories.updateStatus', $dandory->id) }}" method="POST" class="update-form status-form">
                                 @csrf
@@ -363,8 +469,9 @@
                         
                         if (form.classList.contains('status-form')) {
                             const newStatus = formData.get('status');
-                            const statusCell = row.querySelector('.status-cell');
-                            statusCell.setAttribute('data-status', newStatus);
+                            
+                            // Update the data-status attribute on the entire row
+                            row.setAttribute('data-status', newStatus);
 
                             const currentTableContainer = row.closest('div[id$="-tickets-container"]');
                             if (newStatus === 'FINISH' && currentTableContainer.id === 'active-tickets-container') {
