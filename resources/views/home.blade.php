@@ -1,7 +1,6 @@
 @extends('layouts.app')
 
 @section('content')
-{{-- Use a PHP block to get the authenticated user and their roles at the very top --}}
 @php
     $user = Auth::user();
     $isAdmin = $user->hasRole('Admin');
@@ -36,18 +35,35 @@
     .text-primary-dark {
         color: #0056b3;
     }
-    .status-todo { background-color: #f8d7da !important; }
-    .status-in-progress { background-color: #fff3cd !important; }
-    .status-pending { background-color: #e2e3e5 !important; }
-    .status-finish { background-color: #d1e7dd !important; }
+    .glass-card {
+        background: rgba(255, 255, 255, 0.15) !important;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 1rem;
+        box-shadow: 0 8px 32px rgba(31, 38, 135, 0.2);
+        color: #fff;
+    }
+    .glass-card .card-header {
+        background: rgba(255, 255, 255, 0.2);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        color: #fff;
+    }
+    .glass-card h5, 
+    .glass-card p, 
+    .glass-card li {
+        color: #000000 !important;
+    }
+    tr[data-status="TO DO"] { background-color: #f8d7da !important; }
+    tr[data-status="IN PROGRESS"] { background-color: #fff3cd !important; }
+    tr[data-status="PENDING"] { background-color: #e2e3e5 !important; }
+    tr[data-status] td { background-color: inherit; }
 </style>
 
 <div class="container py-5">
     <h2 class="text-center mb-4 text-dark font-weight-bold">Welcome, {{ $user->name }} 👋</h2>
     
     <div class="row row-cols-1 row-cols-md-3 g-4 justify-content-center mt-4">
-
-        {{-- Card for Manage Users --}}
         @if($isAdmin)
         <div class="col-md-4">
             <a href="{{ route('users.index') }}" class="text-decoration-none card-link-hover">
@@ -61,8 +77,6 @@
             </a>
         </div>
         @endif
-
-        {{-- Card for Manage Roles --}}
         @if($isAdmin)
         <div class="col-md-4">
             <a href="{{ route('roles.index') }}" class="text-decoration-none card-link-hover">
@@ -77,7 +91,6 @@
         </div>
         @endif
         
-        {{-- Card for Dandory Tickets --}}
         @if($isAdmin || $isRequestor || $isTeknisi)
         <div class="col-md-4">
             <a href="{{ route('dandories.index') }}" class="text-decoration-none card-link-hover">
@@ -92,145 +105,130 @@
         </div>
         @endif
     </div>
-
     @if (session('status'))
         <div class="alert alert-success text-center mt-5" role="alert">
             {{ session('status') }}
         </div>
     @endif
-
-    {{-- Dashboard Charts --}}
     @if($isAdmin || $isTeknisi || $isView)
     <div class="row mt-5">
-        <h3 class="text-center mb-4 text-dark font-weight-bold">Dandoriman Ticket Support</h3>
-        <p class="text-center text-muted mb-4">A visual breakdown of dandoriman ticket data.</p>
+        <h3 class="text-center mb-4 text-dark font-weight-bold">Dandoriman Ticket Dashboard</h3>
         <div class="row g-4 justify-content-center">
-            
-            {{-- Chart 1: Ticket Status --}}
-            <div class="col-lg-4 col-md-6 mb-4">
-                <div class="card shadow-sm h-100 p-3">
-                    <div class="card-header text-center">
-                        <h5>Ticket Status Breakdown</h5>
-                    </div>
-                    <div class="card-body d-flex flex-column align-items-center">
-                        <div style="width: 75%;">
-                            <canvas id="ticketStatusChart"></canvas>
-                        </div>
-                        <ul class="list-unstyled mt-3 w-75">
-                            @foreach($ticketStatusChartData['labels'] as $key => $label)
-                                <li>
-                                    <span style="display:inline-block;width:10px;height:10px;background-color:{{ $ticketStatusChartData['colors'][$key] }};margin-right:5px;border-radius:50%;"></span>
-                                    {{ $label }}: {{ $ticketStatusChartData['data'][$key] }}
-                                </li>
-                            @endforeach
-                        </ul>
-                    </div>
-                </div>
+            <div class="row g-4 justify-content-center">
+    <div class="col-lg-6 col-md-6 mb-4">
+        <div class="card glass-card h-100 p-3">
+            <div class="card-header text-center">
+                <h5>Ticket Status Breakdown</h5>
             </div>
-
-            {{-- Chart 2: Tickets per Dandoriman --}}
-            <div class="col-lg-4 col-md-6 mb-4">
-                <div class="card shadow-sm h-100 p-3">
-                    <div class="card-header text-center">
-                        <h5>Tickets per Dandoriman</h5>
-                    </div>
-                    <div class="card-body d-flex flex-column align-items-center">
-                        <div style="width: 75%;">
-                            <canvas id="dandoriManChart"></canvas>
-                        </div>
-                        <ul class="list-unstyled mt-3 w-75">
-                            @foreach($dandoriManChartData['labels'] as $key => $label)
-                                <li>
-                                    <span style="display:inline-block;width:10px;height:10px;background-color:{{ $dandoriManChartData['colors'][$key] }};margin-right:5px;border-radius:50%;"></span>
-                                    {{ $label }}: {{ $dandoriManChartData['data'][$key] }}
-                                </li>
-                            @endforeach
-                        </ul>
-                    </div>
+            <div class="card-body d-flex flex-column align-items-center">
+                <div style="width: 75%;">
+                    <canvas id="ticketStatusChart"></canvas>
                 </div>
+                <ul class="list-unstyled mt-3 w-75">
+                    @foreach($ticketStatusChartData['labels'] as $key => $label)
+                        <li>
+                            <span style="display:inline-block;width:10px;height:10px;background-color:{{ $ticketStatusChartData['colors'][$key] }};margin-right:5px;border-radius:50%;"></span>
+                            {{ $label }}: {{ $ticketStatusChartData['data'][$key] }}
+                        </li>
+                    @endforeach
+                </ul>
             </div>
-            
-            {{-- Chart 3: Daily, Weekly, Monthly - Hidden for 'Views' role --}}
-            @if(!$isView)
-            <div class="col-lg-4 col-md-12 mb-4">
-                <div class="card shadow-sm h-100 p-3">
-                    <div class="card-header text-center">
-                        <h5>Daily, Weekly & Monthly Tickets</h5>
-                    </div>
-                    <div class="card-body d-flex flex-column align-items-center">
-                        <div class="btn-group mb-3" role="group">
-                            <button type="button" class="btn btn-sm btn-primary" id="dailyBtn">Daily</button>
-                            <button type="button" class="btn btn-sm btn-secondary" id="weeklyBtn">Weekly</button>
-                            <button type="button" class="btn btn-sm btn-secondary" id="monthlyBtn">Monthly</button>
-                        </div>
-                        {{-- Date picker for daily filter --}}
-                        <div id="daily-filter-container" class="mb-3">
-                            <div class="row g-2">
-                                <div class="col">
-                                    <label for="start-date" class="form-label visually-hidden">Start Date</label>
-                                    <input type="date" id="start-date" class="form-control form-control-sm" title="Start Date">
-                                </div>
-                                <div class="col">
-                                    <label for="end-date" class="form-label visually-hidden">End Date</label>
-                                    <input type="date" id="end-date" class="form-control form-control-sm" title="End Date">
-                                </div>
-                            </div>
-                        </div>
-                        <div style="width: 100%;">
-                            <canvas id="resolutionChart"></canvas>
-                        </div>
-                        <ul id="resolution-legend" class="list-unstyled mt-3 w-100"></ul>
-                    </div>
-                </div>
-            </div>
-            @endif
         </div>
     </div>
-    @endif
-
-    {{-- Dandori Tickets Table for 'Views' role --}}
-    @if($isView)
-    <div class="row mt-5">
-        <div class="col-12">
-            <div class="card shadow-sm">
-                <div class="card-header text-center">
-                    <h5>All Dandori Tickets</h5>
+    @if(!$isView)
+    <div class="col-lg-6 col-md-6 mb-4">
+        <div class="card glass-card h-100 p-3">
+            <div class="card-header text-center">
+                <h5>Tickets per Dandoriman</h5>
+            </div>
+            <div class="card-body d-flex flex-column align-items-center">
+                <div style="width: 75%;">
+                    <canvas id="dandoriManChart"></canvas>
                 </div>
-                <div class="card-body table-responsive">
-                    <table class="table table-bordered table-striped" id="dandori-table">
-                        <thead>
-                            <tr>
-                                <th>Key</th>
-                                <th>Line Produksi</th>
-                                <th>Requestor</th>
-                                <th>Customer</th>
-                                <th>Part Name</th>
-                                <th>Part Number</th>
-                                <th>Process</th>
-                                <th>Machine</th>
-                                <th>Qty PCS</th>
-                                <th>Planning Shift</th>
-                                <th>Status</th>
-                                <th>Dandori Man</th>
-                            </tr>
-                        </thead>
-                        <tbody id="dandori-table-body">
-                            {{-- Table body will be populated by JavaScript --}}
-                        </tbody>
-                    </table>
-                </div>
+                <ul class="list-unstyled mt-3 w-75">
+                    @foreach($dandoriManChartData['labels'] as $key => $label)
+                        <li>
+                            <span style="display:inline-block;width:10px;height:10px;background-color:{{ $dandoriManChartData['colors'][$key] }};margin-right:5px;border-radius:50%;"></span>
+                            {{ $label }}: {{ $dandoriManChartData['data'][$key] }}
+                        </li>
+                    @endforeach
+                </ul>
             </div>
         </div>
     </div>
     @endif
-
 </div>
-
+@if(!$isView)
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card glass-card h-100 p-3">
+            <div class="card-header text-center">
+                <h5>Daily, Weekly & Monthly Tickets</h5>
+            </div>
+            <div class="card-body">
+                <div class="btn-group mb-3 d-flex justify-content-center" role="group">
+                    <button type="button" class="btn btn-sm btn-primary" id="dailyBtn">Daily</button>
+                    <button type="button" class="btn btn-sm btn-secondary" id="weeklyBtn">Weekly</button>
+                    <button type="button" class="btn btn-sm btn-secondary" id="monthlyBtn">Monthly</button>
+                </div>
+                <div id="daily-filter-container" class="mb-3">
+                    <div class="row g-2">
+                        <div class="col">
+                            <input type="date" id="start-date" class="form-control form-control-sm" title="Start Date">
+                        </div>
+                        <div class="col">
+                            <input type="date" id="end-date" class="form-control form-control-sm" title="End Date">
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-8">
+                        <canvas id="resolutionChart"></canvas>
+                    </div>
+                    <div class="col-md-4 d-flex align-items-center">
+                        <ul id="resolution-legend" class="list-unstyled w-100"></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@endif
+        </div>
+        @if($isView)
+    <div class="row mt-5">
+        <h3 class="text-center mb-4 text-dark font-weight-bold">Active Dandory Tickets</h3>
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th class="text-dark">ID</th>
+                        <th class="text-dark">Line Production</th>
+                        <th class="text-dark">Requestor</th>
+                        <th class="text-dark">Customer</th>
+                        <th class="text-dark">Nama Part</th>
+                        <th class="text-dark">Nomor Part</th>
+                        <th class="text-dark">Proses</th>
+                        <th class="text-dark">Mesin</th>
+                        <th class="text-dark">Qty (pcs)</th>
+                        <th class="text-dark">Planning Shift</th>
+                        <th class="text-dark">Status</th>
+                        <th class="text-dark">Assigned To</th>
+                    </tr>
+                </thead>
+                <tbody id="dandori-table-body">
+                </tbody>
+            </table>
+        </div>
+    </div>
+    @endif
+    </div>
+    @endif
+</div>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
 <script>
     let ticketStatusChart, dandoriManChart, resolutionChart;
-
     const ticketStatusChartData = {
         labels: @json($ticketStatusChartData['labels']),
         datasets: [{
@@ -239,7 +237,6 @@
             hoverOffset: 4
         }]
     };
-
     const dandoriManChartData = {
         labels: @json($dandoriManChartData['labels']),
         datasets: [{
@@ -248,24 +245,18 @@
             hoverOffset: 4
         }]
     };
-
     const dailyTicketCounts = @json($dailyTicketCounts);
     const monthlyTicketCounts = @json($monthlyTicketCounts);
-    
     const colorPalette = ['#007bff', '#28a745', '#dc3545', '#ffc107', '#17a2b8', '#6610f2', '#6c757d', '#fd7e14', '#e83e8c', '#6f42c1', '#20c997', '#d63384'];
-
-
     document.addEventListener('DOMContentLoaded', function() {
         const legendContainer = document.getElementById('resolution-legend');
         const dailyBtn = document.getElementById('dailyBtn');
         const weeklyBtn = document.getElementById('weeklyBtn');
         const monthlyBtn = document.getElementById('monthlyBtn');
         const allButtons = [dailyBtn, weeklyBtn, monthlyBtn];
-
         const dailyFilterContainer = document.getElementById('daily-filter-container');
         const startDateInput = document.getElementById('start-date');
         const endDateInput = document.getElementById('end-date');
-
         const today = new Date();
         const thirtyDaysAgo = new Date();
         thirtyDaysAgo.setDate(today.getDate() - 29);
@@ -273,14 +264,12 @@
         const sevenDaysAgo = new Date(today);
         sevenDaysAgo.setDate(today.getDate() - 6);
         const sevenDaysAgoStr = sevenDaysAgo.toISOString().slice(0, 10);
-        
         if (startDateInput) {
             startDateInput.setAttribute('max', todayStr);
             endDateInput.setAttribute('max', todayStr);
             startDateInput.value = sevenDaysAgoStr;
             endDateInput.value = todayStr;
         }
-
         function setActiveButton(activeButton) {
             if (!activeButton) return;
             allButtons.forEach(btn => {
@@ -290,13 +279,11 @@
             activeButton.classList.remove('btn-secondary');
             activeButton.classList.add('btn-primary');
         }
-        
         function tooltipWithPercentage(context) {
             const dataset = context.dataset.data;
             const total = dataset.reduce((a, b) => a + b, 0);
             const value = context.raw;
             const percentage = total > 0 ? ((value / total) * 100).toFixed(2) : 0;
-            
             if (context.chart.config.type === 'doughnut') {
                 if (value === 0) {
                     return '';
@@ -305,7 +292,6 @@
             }
             return `${context.label}: ${value}`;
         }
-        
         function createTicketStatusChart() {
             if (ticketStatusChart) ticketStatusChart.destroy();
             const ctx = document.getElementById('ticketStatusChart').getContext('2d');
@@ -337,13 +323,10 @@
                 plugins: [ChartDataLabels]
             });
         }
-        
         function createDandoriManChart() {
             if (dandoriManChart) dandoriManChart.destroy();
             const ctx = document.getElementById('dandoriManChart').getContext('2d');
-            
             const dandoriManColors = dandoriManChartData.labels.map((_, index) => colorPalette[index % colorPalette.length]);
-            
             dandoriManChart = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
@@ -379,13 +362,10 @@
                 plugins: [ChartDataLabels]
             });
         }
-        
         function createResolutionChart(type, data, labels, chartLabel) {
             if (resolutionChart) resolutionChart.destroy();
             const ctx = document.getElementById('resolutionChart').getContext('2d');
-            
             const resolutionColors = labels.map((_, index) => colorPalette[index % colorPalette.length]);
-            
             resolutionChart = new Chart(ctx, {
                 type: type,
                 data: {
@@ -422,7 +402,6 @@
             });
             updateLegend(labels, data, resolutionColors);
         }
-
         function updateLegend(labels, data, colors){
             if (!legendContainer) return;
             legendContainer.innerHTML='';
@@ -431,14 +410,12 @@
                 legendContainer.innerHTML += `<li><span style="display:inline-block;width:10px;height:10px;background-color:${color};margin-right:5px;border-radius:50%;"></span>${label}: ${data[index]} tickets</li>`;
             });
         }
-
         function filterDailyByRange(startDate, endDate) {
             const labels = [];
             const data = [];
             const start = new Date(startDate);
             const end = new Date(endDate);
             const currentDate = new Date(start);
-
             while (currentDate <= end) {
                 const key = currentDate.toISOString().slice(0, 10);
                 labels.push(currentDate.toLocaleDateString('id-ID', { weekday: 'short', day: '2-digit', month: '2-digit' }));
@@ -447,14 +424,12 @@
             }
             createResolutionChart('bar', data, labels, 'Daily Tickets');
         }
-
         function filterDaily() {
             if (dailyFilterContainer) {
                 dailyFilterContainer.style.display = 'block';
                 filterDailyByRange(startDateInput.value, endDateInput.value);
             }
         }
-
         function filterWeekly(){
             if (dailyFilterContainer) {
                 dailyFilterContainer.style.display = 'none';
@@ -466,10 +441,8 @@
                 endDate.setDate(today.getDate()-(7*(3-i)));
                 const startDate=new Date(endDate);
                 startDate.setDate(endDate.getDate()-6);
-
                 const label=`Week ${i+1} (${startDate.toLocaleDateString('id-ID',{day:'2-digit',month:'2-digit'})} - ${endDate.toLocaleDateString('id-ID',{day:'2-digit',month:'2-digit'})})`;
                 weeklyLabels.unshift(label);
-
                 let total=0;
                 for(const [date,count] of Object.entries(dailyTicketCounts)){
                     const [y,m,d]=date.split('-');
@@ -480,7 +453,6 @@
             }
             createResolutionChart('bar',weeklyData,weeklyLabels,'Weekly Tickets');
         }
-
         function filterMonthly(){
             if (dailyFilterContainer) {
                 dailyFilterContainer.style.display = 'none';
@@ -496,7 +468,6 @@
             }
             createResolutionChart('bar',data,labels,'Monthly Tickets');
         }
-        
         if (dailyBtn) {
             dailyBtn.addEventListener('click', () => {
                 setActiveButton(dailyBtn);
@@ -515,7 +486,6 @@
                 filterMonthly();
             });
         }
-
         if (startDateInput) {
             startDateInput.addEventListener('change', () => {
                 filterDailyByRange(startDateInput.value, endDateInput.value);
@@ -526,30 +496,29 @@
                 filterDailyByRange(startDateInput.value, endDateInput.value);
             });
         }
-
         const isView = @json($isView);
         const isAdminOrTeknisi = @json($isAdmin || $isTeknisi);
-        
         if (isView || isAdminOrTeknisi) {
             createTicketStatusChart();
+        }
+        if (isAdminOrTeknisi) {
             createDandoriManChart();
         }
-        
         if(dailyBtn) {
             filterDaily();
         } else if (isAdminOrTeknisi) {
             createResolutionChart('bar',[],[],'');
         }
-
         if (isView) {
             fetch('{{ route('home.dandories.data') }}')
                 .then(response => response.json())
                 .then(data => {
+                    const filteredData = data.filter(ticket => ticket.status !== 'FINISH');
                     const tableBody = document.getElementById('dandori-table-body');
                     tableBody.innerHTML = '';
-                    data.forEach(ticket => {
+                    filteredData.forEach(ticket => {
                         const row = document.createElement('tr');
-                        row.classList.add(`status-${ticket.status.toLowerCase().replace(' ', '-')}`);
+                        row.setAttribute('data-status', ticket.status);
                         row.innerHTML = `
                             <td>${ticket.ddcnk_id}</td>
                             <td>${ticket.line_production}</td>
