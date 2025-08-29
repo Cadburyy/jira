@@ -89,38 +89,15 @@
             from { opacity: 0; transform: translateY(-20px); }
             to { opacity: 1; transform: translateY(0); }
         }
-
-        .brand-bullet {
-            position: relative;
-            display: inline-block;
-            font-weight: bold;
-        }
-        .firefly {
-            position: absolute;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            opacity: 1;
-            pointer-events: none;
-        }
-        .firefly.red {
-            background: radial-gradient(circle, #ffaaaa, #ff0000);
-            box-shadow: 0 0 12px 4px rgba(255, 0, 0, 0.7);
-        }
-        .firefly.blue {
-            background: radial-gradient(circle, #aaaaff, #0000ff);
-            box-shadow: 0 0 12px 4px rgba(0, 0, 255, 0.7);
-        }
     </style>
 </head>
 <body>
     <div id="app">
         <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm fixed-blur-navbar">
             <div class="container">
-                <a class="navbar-brand brand-bullet" href="{{ url('/') }}">
-                    Citra Nugerah Karya
-                    <span class="firefly red"></span>
-                    <span class="firefly blue"></span>
+                <a class="navbar-brand d-flex align-items-center" href="{{ url('/') }}">
+                    <img src="{{ asset('images/cnk.png') }}" alt="CNK Logo" style="height: 30px;">
+                    <span class="ms-2">Citra Nugerah Karya</span>
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" 
                     aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
@@ -142,16 +119,16 @@
                                 $isRequestor = $user->hasRole('Requestor');
                                 $isTeknisi = $user->hasRole('Teknisi');
                                 $isView = $user->hasRole('Views');
+                                $isTeknisiAdmin = $user->hasRole('AdminTeknisi');
                             @endphp
-                            @if($isView)
+                            @if($isView || $isAdmin || $isRequestor || $isTeknisi || $isTeknisiAdmin)
                                 <li><a class="nav-link" href="{{ route('home') }}">Home</a></li>
                             @endif
-                            @if($isAdmin || $isRequestor || $isTeknisi)
-                                <li><a class="nav-link" href="{{ route('home') }}">Home</a></li>
-                                @if($isAdmin)
-                                    <li><a class="nav-link" href="{{ route('users.index') }}">Manage Users</a></li>
-                                    <li><a class="nav-link" href="{{ route('roles.index') }}">Manage Role</a></li>
-                                @endif
+                            @if($isAdmin)
+                                <li><a class="nav-link" href="{{ route('users.index') }}">Manage Users</a></li>
+                                <li><a class="nav-link" href="{{ route('roles.index') }}">Manage Role</a></li>
+                            @endif
+                            @if($isAdmin || $isRequestor || $isTeknisi || $isTeknisiAdmin)
                                 <li><a class="nav-link" href="{{ route('dandories.index') }}">Dandory Tickets</a></li>
                             @endif
                             <li class="nav-item dropdown">
@@ -198,43 +175,6 @@
         loadingBar.style.width = '100%';
         loadingBar.style.opacity = '0';
     });
-
-    function animateFirefly(el, container, baseSpeed) {
-        let bounds = container.getBoundingClientRect();
-        let x = Math.random() * bounds.width;
-        let y = Math.random() * bounds.height;
-        let angle = Math.random() * Math.PI * 2;
-
-        function move() {
-            bounds = container.getBoundingClientRect();
-            angle += (Math.random() - 0.5) * 0.3;
-            let step = baseSpeed + (Math.random() - 0.5) * 0.5; // speed variation
-            x += Math.cos(angle) * step;
-            y += Math.sin(angle) * step;
-
-            // bounce inside container
-            if (x < 0) { x = 0; angle = Math.PI - angle; }
-            if (y < 0) { y = 0; angle = -angle; }
-            if (x > bounds.width - 12) { x = bounds.width - 12; angle = Math.PI - angle; }
-            if (y > bounds.height - 12) { y = bounds.height - 12; angle = -angle; }
-
-            el.style.left = x + "px";
-            el.style.top = y + "px";
-
-            requestAnimationFrame(move);
-        }
-        move();
-    }
-
-    document.addEventListener("DOMContentLoaded", () => {
-        const container = document.querySelector(".brand-bullet");
-        const red = document.querySelector(".firefly.red");
-        const blue = document.querySelector(".firefly.blue");
-
-        animateFirefly(red, container, 1.3);
-        animateFirefly(blue, container, 1.0);
-    });
-</script>
-
+    </script>
 </body>
 </html>

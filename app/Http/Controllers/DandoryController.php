@@ -7,6 +7,8 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
+use DB;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class DandoryController extends Controller
 {
@@ -19,35 +21,52 @@ class DandoryController extends Controller
         $this->middleware('permission:dandory-delete', ['only' => ['destroy']]);
     }
 
-    public function index()
+    public function index(Request $request)
     {
         $user = Auth::user();
         $query = Dandory::latest();
+        $dateFilter = $request->input('date', Carbon::today()->toDateString());
 
         $users = User::with('roles')->get();
 
-        if ($user->hasRole('Admin')) {
+        // Get all Teknisi users without pagination
+        $teknisiUsers = User::whereHas('roles', function ($query) {
+            $query->where('name', 'Teknisi');
+        })->get();
+
+        // Get daily counts for all Dandoriman
+        $dailyCounts = Dandory::whereIn('assigned_to', $teknisiUsers->pluck('id'))
+                              ->whereDate('created_at', $dateFilter)
+                              ->select('assigned_to', DB::raw('count(*) as count'))
+                              ->groupBy('assigned_to')
+                              ->pluck('count', 'assigned_to');
+        
+        // Check if the user has either the 'Admin' or 'AdminTeknisi' role
+        if ($user->hasRole('Admin') || $user->hasRole('AdminTeknisi')) {
             $activeDandories = $query->whereIn('status', ['TO DO', 'IN PROGRESS', 'PENDING'])->get();
             $finishedDandories = Dandory::where('status', 'FINISH')->get();
-            return view('dandories.index', compact('activeDandories', 'finishedDandories', 'users'));
+            return view('dandories.index', compact('activeDandories', 'finishedDandories', 'users', 'teknisiUsers', 'dailyCounts', 'dateFilter'));
         }
 
         if ($user->hasRole('Requestor')) {
             $activeDandories = $query->whereIn('status', ['TO DO', 'IN PROGRESS', 'PENDING'])->where('added_by', $user->id)->get();
             $finishedDandories = Dandory::where('status', 'FINISH')->where('added_by', $user->id)->get();
-            return view('dandories.index', compact('activeDandories', 'finishedDandories', 'users'));
+            return view('dandories.index', compact('activeDandories', 'finishedDandories', 'users', 'teknisiUsers', 'dailyCounts', 'dateFilter'));
         }
 
         if ($user->hasRole('Teknisi')) {
             $activeDandories = $query->whereIn('status', ['TO DO', 'IN PROGRESS', 'PENDING'])->where('assigned_to', $user->id)->get();
             $finishedDandories = Dandory::where('status', 'FINISH')->where('assigned_to', $user->id)->get();
-            return view('dandories.index', compact('activeDandories', 'finishedDandories', 'users'));
+            return view('dandories.index', compact('activeDandories', 'finishedDandories', 'users', 'teknisiUsers', 'dailyCounts', 'dateFilter'));
         }
 
         return view('dandories.index', [
             'activeDandories' => collect(),
             'finishedDandories' => collect(),
-            'users' => $users
+            'users' => $users,
+            'teknisiUsers' => $teknisiUsers,
+            'dailyCounts' => $dailyCounts,
+            'dateFilter' => $dateFilter,
         ]);
     }
 
@@ -94,8 +113,8 @@ class DandoryController extends Controller
 
     public function edit(Dandory $dandory)
     {
-        $user = Auth::user();
-        if (!$user->hasRole('Admin')) {
+        // Allow Admin and AdminTeknisi to edit tickets
+        if (!Auth::user()->hasRole('Admin') && !Auth::user()->hasRole('AdminTeknisi')) {
             abort(403);
         }
 
@@ -107,7 +126,8 @@ class DandoryController extends Controller
 
     public function update(Request $request, Dandory $dandory)
     {
-        if (!Auth::user()->hasRole('Admin')) {
+        // Allow Admin and AdminTeknisi to update tickets
+        if (!Auth::user()->hasRole('Admin') && !Auth::user()->hasRole('AdminTeknisi')) {
             abort(403);
         }
 
@@ -139,7 +159,8 @@ class DandoryController extends Controller
 
         $user = Auth::user();
 
-        if (!$user->hasRole('Admin') && $dandory->assigned_to != $user->id) {
+        // Allow Admin, AdminTeknisi, and assigned Teknisi to update status
+        if (!($user->hasRole('Admin') || $user->hasRole('AdminTeknisi')) && $dandory->assigned_to != $user->id) {
             abort(403, 'You can only update the status of tickets assigned to you.');
         }
 
@@ -185,7 +206,7 @@ class DandoryController extends Controller
         $user = Auth::user();
 
         // Check for permission and ticket status
-        if ($user->hasRole('Admin') || ($user->hasRole('Teknisi') && $dandory->status == 'PENDING' && $dandory->assigned_to == $user->id)) {
+        if ($user->hasRole('Admin') || $user->hasRole('AdminTeknisi') || ($user->hasRole('Teknisi') && $dandory->status == 'PENDING' && $dandory->assigned_to == $user->id)) {
             $validatedData = $request->validate([
                 'notes' => 'nullable|string',
             ]);
@@ -201,7 +222,8 @@ class DandoryController extends Controller
 
     public function assign(Request $request, Dandory $dandory)
     {
-        if (!Auth::user()->hasRole('Admin')) {
+        // Allow Admin and AdminTeknisi to assign tickets
+        if (!Auth::user()->hasRole('Admin') && !Auth::user()->hasRole('AdminTeknisi')) {
             abort(403);
         }
 
@@ -218,5 +240,91 @@ class DandoryController extends Controller
     {
         $dandory->delete();
         return redirect()->route('dandories.index')->with('success', 'Dandory ticket deleted successfully!');
+    }
+
+    public function download(Request $request, $type)
+    {
+        // Ensure only authorized users can download
+        if (!Auth::user()->hasAnyRole(['Admin', 'AdminTeknisi'])) {
+            abort(403);
+        }
+
+        $query = Dandory::query();
+
+        // Apply filters based on ticket type
+        if ($type === 'wip') {
+            $query->whereIn('status', ['TO DO', 'IN PROGRESS', 'PENDING']);
+
+            if ($request->has('select_all')) {
+                // No further filtering needed
+            } else {
+                if ($request->filled('creation_date')) {
+                    $query->whereDate('created_at', $request->input('creation_date'));
+                }
+                if ($request->has('statuses')) {
+                    $query->whereIn('status', $request->input('statuses'));
+                }
+            }
+        } elseif ($type === 'finished') {
+            $query->where('status', 'FINISH');
+
+            if ($request->filled('from_date') && $request->filled('to_date')) {
+                $query->whereBetween('updated_at', [$request->input('from_date'), $request->input('to_date')]);
+            }
+        }
+
+        $tickets = $query->get();
+
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="dandory_tickets_' . $type . '_' . date('Y-m-d') . '.csv"',
+        ];
+
+        $callback = function() use ($tickets) {
+            $file = fopen('php://output', 'w');
+            fputs($file, $bom = (chr(0xEF) . chr(0xBB) . chr(0xBF)));
+
+            // Write CSV Headers
+            fputcsv($file, [
+                'ID', 'Key', 'Line Production', 'Requestor', 'Customer', 'Part Name', 'Part No', 
+                'Process', 'Machine', 'Qty', 'Planning Shift', 'Status', 'Check In', 'Check Out', 
+                'Total Time Needed (minutes)', 'Notes', 'Assigned To', 'Created At', 'Updated At'
+            ]);
+
+            // Write ticket data
+            foreach ($tickets as $ticket) {
+                $totalTime = 'N/A';
+                if ($ticket->check_in && $ticket->check_out) {
+                    $checkIn = Carbon::parse($ticket->check_in);
+                    $checkOut = Carbon::parse($ticket->check_out);
+                    $totalTime = $checkOut->diffInMinutes($checkIn);
+                }
+
+                fputcsv($file, [
+                    $ticket->id,
+                    $ticket->ddcnk_id,
+                    $ticket->line_production,
+                    $ticket->addedByUser->name ?? 'N/A',
+                    $ticket->customer,
+                    $ticket->nama_part,
+                    $ticket->nomor_part,
+                    $ticket->proses,
+                    $ticket->mesin,
+                    $ticket->qty_pcs,
+                    $ticket->planning_shift,
+                    $ticket->status,
+                    $ticket->check_in,
+                    $ticket->check_out,
+                    $totalTime,
+                    $ticket->notes,
+                    $ticket->assignedUser->name ?? 'N/A',
+                    $ticket->created_at,
+                    $ticket->updated_at
+                ]);
+            }
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 }

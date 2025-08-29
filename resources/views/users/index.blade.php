@@ -23,6 +23,17 @@
     .dropdown-menu .dropdown-item:hover i {
         color: #fff !important;
     }
+    .table-responsive {
+        overflow: visible !important;
+    }
+    .dropdown-cell {
+        position: relative;
+        overflow: visible !important;
+    }
+    .dropdown-menu {
+        position: absolute !important;
+        z-index: 1050;
+    }
 </style>
 
 <div class="container py-4">
@@ -72,7 +83,7 @@
                                     @endif
                                 </div>
                             </td>
-                            <td>
+                            <td class="dropdown-cell">
                                 <div class="dropdown">
                                     <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                                         <i class="fa-solid fa-ellipsis-h"></i>

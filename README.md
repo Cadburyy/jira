@@ -21,13 +21,13 @@
 
 6. Install Laravel UI and generate auth scaffolding
 
-   `composer require laravel/ui
-    php artisan ui bootstrap --auth`
+   `composer require laravel/ui`
+   `php artisan ui bootstrap --auth`
 
 7. Compile the frontend
 
-   `npm install
-    npm run build`
+   `npm install`
+   `npm run build`
 
 8. Run the seeder with:
 

@@ -23,6 +23,17 @@
     .dropdown-menu .dropdown-item:hover i {
         color: #fff !important;
     }
+    .table-responsive {
+    overflow: visible !important;
+    }
+    .dropdown-cell {
+        position: relative;
+        overflow: visible !important;
+    }
+    .dropdown-menu {
+        position: absolute !important;
+        z-index: 1050;
+    }
 </style>
 
 <div class="container py-4">

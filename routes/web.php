@@ -28,4 +28,6 @@ Route::middleware(['auth'])->group(function () {
     Route::put('dandories/{dandory}/planning', [DandoryController::class, 'updatePlanning'])->name('dandories.updatePlanning');
     Route::put('dandories/{dandory}/assign', [DandoryController::class, 'assign'])->name('dandories.assign');
     Route::put('dandories/{dandory}/update-notes', [DandoryController::class, 'updateNotes'])->name('dandories.updateNotes');
+    
+    Route::get('dandories/download/{type}', [DandoryController::class, 'download'])->name('dandories.download');
 });
