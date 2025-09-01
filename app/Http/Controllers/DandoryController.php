@@ -31,42 +31,55 @@ class DandoryController extends Controller
 
         $users = User::with('roles')->get();
 
-        // Get all Teknisi users without pagination
         $teknisiUsers = User::whereHas('roles', function ($query) {
             $query->where('name', 'Teknisi');
         })->get();
 
-        // Get daily counts for all Dandoriman
         $dailyCounts = Dandory::whereIn('assigned_to', $teknisiUsers->pluck('id'))
-                              ->whereDate('created_at', $dateFilter)
-                              ->select('assigned_to', DB::raw('count(*) as count'))
-                              ->groupBy('assigned_to')
-                              ->pluck('count', 'assigned_to');
-        
-        // Check if the user has either the 'Admin' or 'AdminTeknisi' role
+                             ->whereDate('created_at', $dateFilter)
+                             ->select('assigned_to', DB::raw('count(*) as count'))
+                             ->groupBy('assigned_to')
+                             ->pluck('count', 'assigned_to');
+
+        // Merge daily counts into the User collection for sorting
+        $sortedTeknisiUsers = $teknisiUsers->map(function ($teknisiUser) use ($dailyCounts) {
+            $teknisiUser->daily_count = $dailyCounts[$teknisiUser->id] ?? 0;
+            return $teknisiUser;
+        });
+
+        // Correctly sort the collection:
+        // First, by daily_count in descending order.
+        // Second, by name alphabetically for users with the same daily_count.
+        $sortedTeknisiUsers = $sortedTeknisiUsers->sort(function ($a, $b) {
+            if ($a->daily_count === $b->daily_count) {
+                return $a->name <=> $b->name;
+            }
+            return $b->daily_count <=> $a->daily_count;
+        })->values(); // Re-index the collection
+
         if ($user->hasRole('Admin') || $user->hasRole('AdminTeknisi')) {
             $activeDandories = $query->whereIn('status', ['TO DO', 'IN PROGRESS', 'PENDING'])->get();
             $finishedDandories = Dandory::where('status', 'FINISH')->get();
-            return view('dandories.index', compact('activeDandories', 'finishedDandories', 'users', 'teknisiUsers', 'dailyCounts', 'dateFilter'));
+            return view('dandories.index', compact('activeDandories', 'finishedDandories', 'users', 'sortedTeknisiUsers', 'dailyCounts', 'dateFilter'));
         }
 
         if ($user->hasRole('Requestor')) {
             $activeDandories = $query->whereIn('status', ['TO DO', 'IN PROGRESS', 'PENDING'])->where('added_by', $user->id)->get();
             $finishedDandories = Dandory::where('status', 'FINISH')->where('added_by', $user->id)->get();
-            return view('dandories.index', compact('activeDandories', 'finishedDandories', 'users', 'teknisiUsers', 'dailyCounts', 'dateFilter'));
+            return view('dandories.index', compact('activeDandories', 'finishedDandories', 'users', 'sortedTeknisiUsers', 'dailyCounts', 'dateFilter'));
         }
 
         if ($user->hasRole('Teknisi')) {
             $activeDandories = $query->whereIn('status', ['TO DO', 'IN PROGRESS', 'PENDING'])->where('assigned_to', $user->id)->get();
             $finishedDandories = Dandory::where('status', 'FINISH')->where('assigned_to', $user->id)->get();
-            return view('dandories.index', compact('activeDandories', 'finishedDandories', 'users', 'teknisiUsers', 'dailyCounts', 'dateFilter'));
+            return view('dandories.index', compact('activeDandories', 'finishedDandories', 'users', 'sortedTeknisiUsers', 'dailyCounts', 'dateFilter'));
         }
 
         return view('dandories.index', [
             'activeDandories' => collect(),
             'finishedDandories' => collect(),
             'users' => $users,
-            'teknisiUsers' => $teknisiUsers,
+            'sortedTeknisiUsers' => $sortedTeknisiUsers,
             'dailyCounts' => $dailyCounts,
             'dateFilter' => $dateFilter,
         ]);
@@ -115,7 +128,6 @@ class DandoryController extends Controller
 
     public function edit(Dandory $dandory)
     {
-        // Allow Admin and AdminTeknisi to edit tickets
         if (!Auth::user()->hasRole('Admin') && !Auth::user()->hasRole('AdminTeknisi')) {
             abort(403);
         }
@@ -128,7 +140,6 @@ class DandoryController extends Controller
 
     public function update(Request $request, Dandory $dandory)
     {
-        // Allow Admin and AdminTeknisi to update tickets
         if (!Auth::user()->hasRole('Admin') && !Auth::user()->hasRole('AdminTeknisi')) {
             abort(403);
         }
@@ -161,7 +172,6 @@ class DandoryController extends Controller
 
         $user = Auth::user();
 
-        // Allow Admin, AdminTeknisi, and assigned Teknisi to update status
         if (!($user->hasRole('Admin') || $user->hasRole('AdminTeknisi')) && $dandory->assigned_to != $user->id) {
             abort(403, 'You can only update the status of tickets assigned to you.');
         }
@@ -202,12 +212,10 @@ class DandoryController extends Controller
         return response()->json(['success' => true, 'message' => 'Planning setting updated successfully.']);
     }
 
-    // New method for updating notes
     public function updateNotes(Request $request, Dandory $dandory)
     {
         $user = Auth::user();
 
-        // Check for permission and ticket status
         if ($user->hasRole('Admin') || $user->hasRole('AdminTeknisi') || ($user->hasRole('Teknisi') && $dandory->status == 'PENDING' && $dandory->assigned_to == $user->id)) {
             $validatedData = $request->validate([
                 'notes' => 'nullable|string',
@@ -218,42 +226,35 @@ class DandoryController extends Controller
             return redirect()->route('dandories.show', $dandory)->with('success', 'Notes updated successfully!');
         }
 
-        // Abort if the user does not have permission
         abort(403, 'You do not have permission to update notes on this ticket.');
     }
 
-public function assign(Request $request, Dandory $dandory)
-{
-    // Allow Admin and AdminTeknisi to assign tickets
-    if (!Auth::user()->hasRole('Admin') && !Auth::user()->hasRole('AdminTeknisi')) {
-        abort(403);
-    }
-
-    $request->validate([
-        'assigned_to' => 'nullable|exists:users,id',
-    ]);
-    
-    // Find the user who is being assigned the ticket
-    $assignedToUser = User::find($request->assigned_to);
-
-    // Update the ticket with the new assigned user's ID
-    $dandory->update(['assigned_to' => $request->assigned_to]);
-    
-    // Check if a user was assigned and send the email
-    if ($assignedToUser) {
-        try {
-            Mail::to($assignedToUser->email)->send(new TicketAssignedMail($dandory, $assignedToUser));
-            return response()->json(['success' => true, 'message' => 'Ticket assigned successfully. Email notification sent.']);
-        } catch (\Exception $e) {
-            // Log the error and return a successful response with a warning
-            \Log::error('Failed to send email: ' . $e->getMessage());
-            return response()->json(['success' => true, 'message' => 'Ticket assigned successfully, but failed to send email notification.']);
+    public function assign(Request $request, Dandory $dandory)
+    {
+        if (!Auth::user()->hasRole('Admin') && !Auth::user()->hasRole('AdminTeknisi')) {
+            abort(403);
         }
-    }
 
-    // If no user was assigned (the dropdown was reset to "-- Assign --")
-    return response()->json(['success' => true, 'message' => 'Ticket assignment updated successfully.']);
-}
+        $request->validate([
+            'assigned_to' => 'nullable|exists:users,id',
+        ]);
+        
+        $assignedToUser = User::find($request->assigned_to);
+
+        $dandory->update(['assigned_to' => $request->assigned_to]);
+        
+        if ($assignedToUser) {
+            try {
+                Mail::to($assignedToUser->email)->send(new TicketAssignedMail($dandory, $assignedToUser));
+                return response()->json(['success' => true, 'message' => 'Ticket assigned successfully. Email notification sent.']);
+            } catch (\Exception $e) {
+                \Log::error('Failed to send email: ' . $e->getMessage());
+                return response()->json(['success' => true, 'message' => 'Ticket assigned successfully, but failed to send email notification.']);
+            }
+        }
+
+        return response()->json(['success' => true, 'message' => 'Ticket assignment updated successfully.']);
+    }
 
     public function destroy(Dandory $dandory)
     {
@@ -263,19 +264,16 @@ public function assign(Request $request, Dandory $dandory)
 
     public function download(Request $request, $type)
     {
-        // Ensure only authorized users can download
         if (!Auth::user()->hasAnyRole(['Admin', 'AdminTeknisi'])) {
             abort(403);
         }
 
         $query = Dandory::query();
 
-        // Apply filters based on ticket type
         if ($type === 'wip') {
             $query->whereIn('status', ['TO DO', 'IN PROGRESS', 'PENDING']);
 
             if ($request->has('select_all')) {
-                // No further filtering needed
             } else {
                 if ($request->filled('creation_date')) {
                     $query->whereDate('created_at', $request->input('creation_date'));
@@ -303,14 +301,12 @@ public function assign(Request $request, Dandory $dandory)
             $file = fopen('php://output', 'w');
             fputs($file, $bom = (chr(0xEF) . chr(0xBB) . chr(0xBF)));
 
-            // Write CSV Headers
             fputcsv($file, [
                 'ID', 'Key', 'Line Production', 'Requestor', 'Customer', 'Part Name', 'Part No', 
                 'Process', 'Machine', 'Qty', 'Planning Shift', 'Status', 'Check In', 'Check Out', 
                 'Total Time Needed (minutes)', 'Notes', 'Assigned To', 'Created At', 'Updated At'
             ]);
 
-            // Write ticket data
             foreach ($tickets as $ticket) {
                 $totalTime = 'N/A';
                 if ($ticket->check_in && $ticket->check_out) {

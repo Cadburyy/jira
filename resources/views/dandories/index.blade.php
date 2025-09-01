@@ -93,11 +93,11 @@ body, html {
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($teknisiUsers->chunk(2) as $chunk)
+                        @foreach ($sortedTeknisiUsers->chunk(2) as $chunk)
                         <tr>
                             @foreach ($chunk as $user)
                                 <td>{{ $user->name }}</td>
-                                <td>{{ $dailyCounts[$user->id] ?? 0 }}</td>
+                                <td>{{ $user->daily_count }}</td>
                             @endforeach
                             @if ($chunk->count() < 2)
                                 <td colspan="2"></td>
@@ -555,7 +555,6 @@ body, html {
                         showMessage('success', result.message);
                         if (form.classList.contains('status-form')) {
                             const newStatus = formData.get('status');
-                            // Update the data-status attribute on the entire row
                             row.setAttribute('data-status', newStatus);
                             const currentTableContainer = row.closest('div[id$="-tickets-container"]');
                             if (newStatus === 'FINISH' && currentTableContainer.id === 'active-tickets-container') {
@@ -582,7 +581,6 @@ body, html {
             }
         }
 
-        // Handle the custom modal for deletion
         var deleteModal = document.getElementById('deleteModal');
         deleteModal.addEventListener('show.bs.modal', function (event) {
             var button = event.relatedTarget;
@@ -591,7 +589,6 @@ body, html {
             form.action = action;
         });
 
-        // Handle the download modal logic
         const downloadModal = document.getElementById('downloadModal');
         const wipOptions = document.getElementById('wip-options');
         const finishedOptions = document.getElementById('finished-options');
@@ -613,7 +610,6 @@ body, html {
                 finishedOptions.style.display = 'block';
                 downloadForm.action = "{{ route('dandories.download', ['type' => 'finished']) }}";
             }
-            // Reset forms
             downloadForm.reset();
             wipSpecificFilters.style.display = 'block';
             statusCheckboxes.forEach(checkbox => checkbox.disabled = false);
