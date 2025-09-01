@@ -21,6 +21,10 @@ tr[data-status="PENDING"] {
 tr[data-status] td {
     background-color: inherit;
 }
+body, html {
+    overflow-x: hidden;
+    width: 100%;
+}
 .table-responsive {
     overflow: visible !important;
 }
@@ -32,12 +36,16 @@ tr[data-status] td {
     position: absolute !important;
     z-index: 1050;
 }
+.table-responsive {
+    overflow-x: auto !important;
+}
 .table-responsive .dropdown {
     position: static;
 }
 .table-responsive .dropdown-menu {
     position: absolute;
     transform: none;
+    background-color: #fff !important;
 }
 .dropdown-menu .dropdown-item {
     transition: background-color 0.3s, color 0.3s;
@@ -79,9 +87,9 @@ tr[data-status] td {
                     <thead class="bg-light">
                         <tr>
                             <th>Name</th>
-                            <th>Tickets Assigned Today</th>
+                            <th>Tickets</th>
                             <th>Name</th>
-                            <th>Tickets Assigned Today</th>
+                            <th>Tickets</th>
                         </tr>
                     </thead>
                     <tbody>

@@ -69,34 +69,7 @@
         <p class="text-center text-dark mt-1 mb-3"><strong>Dandory request system</strong></p>
     @endif
     
-    <div class="row row-cols-1 row-cols-md-3 g-3 justify-content-center mt-3">
-        @if($isAdmin)
-        <div class="col-md-4">
-            <a href="{{ route('users.index') }}" class="text-decoration-none card-link-hover">
-                <div class="card h-100 text-center shadow-sm p-3">
-                    <div class="card-body d-flex flex-column justify-content-center align-items-center">
-                        <i class="fas fa-users fa-3x mb-2 text-primary-dark"></i>
-                        <h5 class="card-title text-dark"><strong>Manage Users</strong></h5>
-                        <p class="card-text text-muted"><strong>View and manage all user accounts.</strong></p>
-                    </div>
-                </div>
-            </a>
-        </div>
-        @endif
-        @if($isAdmin)
-        <div class="col-md-4">
-            <a href="{{ route('roles.index') }}" class="text-decoration-none card-link-hover">
-                <div class="card h-100 text-center shadow-sm p-3">
-                    <div class="card-body d-flex flex-column justify-content-center align-items-center">
-                        <i class="fas fa-user-tag fa-3x mb-2 text-success"></i>
-                        <h5 class="card-title text-dark"><strong>Manage Roles</strong></h5>
-                        <p class="card-text text-muted"><strong>Assign and modify user roles and permissions.</strong></p>
-                    </div>
-                </div>
-            </a>
-        </div>
-        @endif
-        
+    <div class="row row-cols-1 row-cols-md-3 g-3 justify-content-center mt-3">        
         @if($isAdmin || $isRequestor || $isTeknisi || $isTeknisiAdmin)
         <div class="col-md-4">
             <a href="{{ route('dandories.index') }}" class="text-decoration-none card-link-hover">

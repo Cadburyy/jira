@@ -12,6 +12,13 @@
         background-color: #ffffff;
         border-bottom: 1px solid #e9ecef;
     }
+    body, html {
+        overflow-x: hidden;
+        width: 100%;
+    }
+    .dropdown-menu {
+        background-color: #fff !important;
+    }
     .dropdown-menu .dropdown-item {
         transition: background-color 0.3s, color 0.3s;
         border-radius: 6px;
@@ -24,7 +31,7 @@
         color: #fff !important;
     }
     .table-responsive {
-        overflow: visible !important;
+        overflow-x: auto !important;
     }
     .dropdown-cell {
         position: relative;

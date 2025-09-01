@@ -1,15 +1,68 @@
 <!doctype html>
+@php
+    use App\Models\Setting;
+
+    $settings = cache()->remember('app_settings', 60, function () {
+        return Setting::pluck('value', 'key')->toArray();
+    });
+
+    $brand = $settings['brand_name'] ?? 'Citra Nugerah Karya';
+    $theme = $settings['theme'] ?? 'light';
+    $font  = $settings['font'] ?? 'Nunito';
+    $logoUrl = !empty($settings['logo_path'])
+        ? asset('storage/'.$settings['logo_path'])
+        : asset('images/cnk.png');
+
+    $fontHrefName = str_replace(' ', '+', $font);
+@endphp
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ config('app.name', 'Dandori Man') }}</title>
+    <title>{{ $brand }}</title>
+
     <link rel="dns-prefetch" href="//fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=Nunito" rel="stylesheet">
+    <link href="https://fonts.bunny.net/css?family={{ $fontHrefName }}:400,600,700" rel="stylesheet">
+
     @vite(['resources/sass/app.scss', 'resources/js/app.js'])
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
     <style>
+        /* Theme tokens */
+        :root {
+            --bg: #f8f9fa;
+            --text: #111827;
+            --surface: #ffffff;
+            --muted: #6b7280;
+            --border: #e5e7eb;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: '{{ $font }}', system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
+        }
+
+        .navbar.navbar-light.bg-white,
+        .dropdown-menu,
+        .card,
+        .navbar-collapse {
+            background-color: var(--surface) !important;
+            color: var(--text) !important;
+        }
+
+        .navbar .nav-link,
+        .dropdown-item {
+            color: var(--text) !important;
+        }
+
+        .card-header {
+            background-color: var(--surface) !important;
+            border-bottom: 1px solid var(--border) !important;
+        }
+
+        /* === your existing styles below === */
         .fixed-blur-navbar {
             position: fixed;
             top: 0;
@@ -49,27 +102,19 @@
         .navbar-nav .nav-link::after {
             background-color: #3b82f6;
         }
-        .navbar-nav .nav-link:hover::before {
-            width: 62.5%;
-        }
-        .navbar-nav .nav-link:hover::after {
-            width: 37.5%;
-        }
-        @media (max-width: 768px) {
+        .navbar-nav .nav-link:hover::before { width: 62.5%; }
+        .navbar-nav .nav-link:hover::after { width: 37.5%; }
+
+        @media (max-width: 767px) {
             .navbar-collapse {
                 background-color: rgba(243, 244, 246, 0.95);
                 padding: 1rem;
                 border-radius: 0.75rem;
                 margin-top: 0.5rem;
-                border: 1px solid rgba(229, 231, 235, 0.5);
                 animation: slideDown 0.3s ease-in-out;
             }
-            .navbar-nav .nav-item {
-                border-bottom: 1px solid #e5e7eb;
-            }
-            .navbar-nav .nav-item:last-child {
-                border-bottom: none;
-            }
+            .navbar-nav .nav-item { border-bottom: 1px solid #e5e7eb; }
+            .navbar-nav .nav-item:last-child { border-bottom: none; }
             .navbar-nav .nav-link {
                 padding: 0.75rem 1rem;
                 font-weight: 500;
@@ -80,10 +125,7 @@
                 border-radius: 0.5rem;
                 transform: translateX(5px);
             }
-            .dropdown-menu {
-                background-color: transparent !important;
-                border: none !important;
-            }
+            .dropdown-menu { background-color: transparent !important; border: none !important; }
         }
         @keyframes slideDown {
             from { opacity: 0; transform: translateY(-20px); }
@@ -91,18 +133,22 @@
         }
     </style>
 </head>
-<body>
+<body data-theme="{{ $theme }}">
     <div id="app">
         <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm fixed-blur-navbar">
             <div class="container">
                 <a class="navbar-brand d-flex align-items-center" href="{{ url('/') }}">
-                    <img src="{{ asset('images/cnk.png') }}" alt="CNK Logo" style="height: 30px;">
-                    <span class="ms-2">Citra Nugerah Karya</span>
+                    <img src="{{ $logoUrl }}" alt="Logo" style="height: 30px;">
                 </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" 
-                    aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
+                <span class="ms-2 align-items-center">{{ $brand }}</span>
+
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" 
+                    data-bs-target="#navbarSupportedContent" 
+                    aria-controls="navbarSupportedContent" aria-expanded="false" 
+                    aria-label="{{ __('Toggle navigation') }}">
                     <span class="navbar-toggler-icon"></span>
                 </button>
+
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <ul class="navbar-nav me-auto"></ul>
                     <ul class="navbar-nav ms-auto">
@@ -124,10 +170,6 @@
                             @if($isView || $isAdmin || $isRequestor || $isTeknisi || $isTeknisiAdmin)
                                 <li><a class="nav-link" href="{{ route('home') }}">Home</a></li>
                             @endif
-                            @if($isAdmin)
-                                <li><a class="nav-link" href="{{ route('users.index') }}">Manage Users</a></li>
-                                <li><a class="nav-link" href="{{ route('roles.index') }}">Manage Role</a></li>
-                            @endif
                             @if($isAdmin || $isRequestor || $isTeknisi || $isTeknisiAdmin)
                                 <li><a class="nav-link" href="{{ route('dandories.index') }}">Dandory Tickets</a></li>
                             @endif
@@ -137,6 +179,9 @@
                                     {{ $user->name }}
                                 </a>
                                 <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                                    @if($isAdmin)
+                                        <a class="dropdown-item" href="{{ route('settings.index') }}">Settings</a>
+                                    @endif
                                     <a class="dropdown-item" href="{{ route('logout') }}"
                                        onclick="event.preventDefault();document.getElementById('logout-form').submit();">
                                         {{ __('Logout') }}
@@ -152,6 +197,7 @@
             </div>
             <div id="loading-bar"></div>
         </nav>
+
         <main class="py-4 mt-5">
             <div class="container-fluid">
                 <div class="row justify-content-center">
@@ -166,6 +212,7 @@
             </div>
         </main>
     </div>
+
    <script>
     const loadingBar = document.getElementById('loading-bar');
     document.addEventListener('DOMContentLoaded', function() {
@@ -175,6 +222,6 @@
         loadingBar.style.width = '100%';
         loadingBar.style.opacity = '0';
     });
-    </script>
+   </script>
 </body>
 </html>

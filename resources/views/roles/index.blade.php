@@ -12,6 +12,10 @@
         background-color: #ffffff;
         border-bottom: 1px solid #e9ecef;
     }
+    body, html {
+        overflow-x: hidden;
+        width: 100%;
+    }
     .dropdown-menu .dropdown-item {
         transition: background-color 0.3s, color 0.3s;
         border-radius: 6px;
@@ -33,6 +37,7 @@
     .dropdown-menu {
         position: absolute !important;
         z-index: 1050;
+        background-color: #fff !important;
     }
 </style>
 
