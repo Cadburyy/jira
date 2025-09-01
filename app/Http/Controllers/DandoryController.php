@@ -6,6 +6,8 @@ use App\Models\Dandory;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Mail\TicketAssignedMail;
+use Illuminate\Support\Facades\Mail;
 use Carbon\Carbon;
 use DB;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -220,21 +222,38 @@ class DandoryController extends Controller
         abort(403, 'You do not have permission to update notes on this ticket.');
     }
 
-    public function assign(Request $request, Dandory $dandory)
-    {
-        // Allow Admin and AdminTeknisi to assign tickets
-        if (!Auth::user()->hasRole('Admin') && !Auth::user()->hasRole('AdminTeknisi')) {
-            abort(403);
-        }
-
-        $request->validate([
-            'assigned_to' => 'nullable|exists:users,id',
-        ]);
-        
-        $dandory->update(['assigned_to' => $request->assigned_to]);
-
-        return response()->json(['success' => true, 'message' => 'Ticket assigned successfully.']);
+public function assign(Request $request, Dandory $dandory)
+{
+    // Allow Admin and AdminTeknisi to assign tickets
+    if (!Auth::user()->hasRole('Admin') && !Auth::user()->hasRole('AdminTeknisi')) {
+        abort(403);
     }
+
+    $request->validate([
+        'assigned_to' => 'nullable|exists:users,id',
+    ]);
+    
+    // Find the user who is being assigned the ticket
+    $assignedToUser = User::find($request->assigned_to);
+
+    // Update the ticket with the new assigned user's ID
+    $dandory->update(['assigned_to' => $request->assigned_to]);
+    
+    // Check if a user was assigned and send the email
+    if ($assignedToUser) {
+        try {
+            Mail::to($assignedToUser->email)->send(new TicketAssignedMail($dandory, $assignedToUser));
+            return response()->json(['success' => true, 'message' => 'Ticket assigned successfully. Email notification sent.']);
+        } catch (\Exception $e) {
+            // Log the error and return a successful response with a warning
+            \Log::error('Failed to send email: ' . $e->getMessage());
+            return response()->json(['success' => true, 'message' => 'Ticket assigned successfully, but failed to send email notification.']);
+        }
+    }
+
+    // If no user was assigned (the dropdown was reset to "-- Assign --")
+    return response()->json(['success' => true, 'message' => 'Ticket assignment updated successfully.']);
+}
 
     public function destroy(Dandory $dandory)
     {
