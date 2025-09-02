@@ -38,7 +38,7 @@ class TicketAssignedMail extends Mailable
     public function envelope()
     {
         return new Envelope(
-            subject: 'New Dandory Ticket Assigned to You',
+            subject: '[Do Not Reply] New Dandory Ticket Assigned',
         );
     }
 

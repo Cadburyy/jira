@@ -7,11 +7,14 @@
     });
 
     $brand = $settings['brand_name'] ?? 'Citra Nugerah Karya';
-    $theme = $settings['theme'] ?? 'light';
     $font  = $settings['font'] ?? 'Nunito';
     $logoUrl = !empty($settings['logo_path'])
         ? asset('storage/'.$settings['logo_path'])
         : asset('images/cnk.png');
+    
+    $faviconUrl = !empty($settings['favicon_path'])
+        ? asset('storage/'.$settings['favicon_path'])
+        : asset('favicon.ico');
 
     $fontHrefName = str_replace(' ', '+', $font);
 @endphp
@@ -21,7 +24,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $brand }}</title>
-
+    
+    <link rel="icon" type="image/x-icon" href="{{ $faviconUrl }}">
     <link rel="dns-prefetch" href="//fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family={{ $fontHrefName }}:400,600,700" rel="stylesheet">
 
@@ -29,7 +33,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 
     <style>
-        /* Theme tokens */
         :root {
             --bg: #f8f9fa;
             --text: #111827;
@@ -62,7 +65,6 @@
             border-bottom: 1px solid var(--border) !important;
         }
 
-        /* === your existing styles below === */
         .fixed-blur-navbar {
             position: fixed;
             top: 0;
@@ -133,7 +135,7 @@
         }
     </style>
 </head>
-<body data-theme="{{ $theme }}">
+<body>
     <div id="app">
         <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm fixed-blur-navbar">
             <div class="container">
@@ -213,7 +215,7 @@
         </main>
     </div>
 
-   <script>
+    <script>
     const loadingBar = document.getElementById('loading-bar');
     document.addEventListener('DOMContentLoaded', function() {
         loadingBar.style.width = '90%';
@@ -222,6 +224,6 @@
         loadingBar.style.width = '100%';
         loadingBar.style.opacity = '0';
     });
-   </script>
+    </script>
 </body>
 </html>

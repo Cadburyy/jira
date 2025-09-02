@@ -7,7 +7,6 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\DandoryController;
 use App\Http\Controllers\SettingsController;
-// CmsController is no longer needed and can be deleted
 
 Route::get('/', function () {
     if (Auth::check()) {
@@ -18,11 +17,9 @@ Route::get('/', function () {
 
 Auth::routes();
 
-// Home
 Route::get('/home', [HomeController::class, 'index'])->name('home');
 Route::get('/home/dandories/data', [HomeController::class, 'getDandoriTicketsData'])->name('home.dandories.data');
 
-// Authenticated routes
 Route::middleware(['auth'])->group(function () {
     Route::resource('roles', RoleController::class);
     Route::resource('users', UserController::class);
@@ -36,13 +33,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('dandories/download/{type}', [DandoryController::class, 'download'])->name('dandories.download');
 });
 
-// Admin-only routes
 Route::middleware(['auth', 'role:Admin'])->group(function () {
     Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
 
-    // Consolidated appearance routes under a single name
     Route::get('/settings/appearance', [SettingsController::class, 'editAppearance'])->name('settings.appearance');
     Route::put('/settings/appearance', [SettingsController::class, 'updateAppearance'])->name('settings.appearance.update');
-
-    // The CmsController routes are now redundant and removed
 });

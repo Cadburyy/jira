@@ -33,7 +33,6 @@
         @method('PUT')
 
         <div class="row g-3">
-            <!-- Brand Name (the text next to the logo in navbar) -->
             <div class="col-md-6">
                 <label for="brand_name" class="form-label"><strong>Brand Name</strong></label>
                 <input type="text" name="brand_name" id="brand_name" class="form-control"
@@ -41,7 +40,6 @@
                 <small class="text-muted">This is the text label shown next to the logo in the navbar.</small>
             </div>
 
-            <!-- Font -->
             <div class="col-md-6">
                 <label for="font" class="form-label"><strong>Font</strong></label>
                 <select name="font" id="font" class="form-select">
@@ -54,7 +52,6 @@
                 <small class="text-muted">We will auto-load the selected font for you.</small>
             </div>
 
-            <!-- Logo PNG -->
             <div class="col-md-6">
                 <label for="logo" class="form-label"><strong>Logo (PNG)</strong></label>
                 <input type="file" name="logo" id="logo" class="form-control" accept="image/png">
@@ -65,6 +62,18 @@
                     </div>
                 @endif
                 <small class="text-muted d-block">Maximum size 2MB. PNG only.</small>
+            </div>
+
+            <div class="col-md-6">
+                <label for="favicon" class="form-label"><strong>Icon (ico, png, jpg, gif)</strong></label>
+                <input type="file" name="favicon" id="favicon" class="form-control" accept="image/*">
+                @if(!empty($settings['favicon_path']))
+                    <div class="mt-2">
+                        <img src="{{ asset('storage/'.$settings['favicon_path']) }}" alt="Current Favicon" style="height:30px">
+                        <div><small class="text-muted">Current favicon</small></div>
+                    </div>
+                @endif
+                <small class="text-muted d-block">Maximum size 2MB. Accepts .ico, .png, .jpg, .gif.</small>
             </div>
 
             <div class="col-12 text-center mt-3">
