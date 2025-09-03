@@ -3,10 +3,6 @@
 @section('content')
 
 <style>
-    /*
-     * For better maintainability, consider moving this CSS to a separate file,
-     * such as `resources/css/dashboard.css`.
-     */
     body, html {
         overflow-x: hidden;
         overflow-y: auto;
@@ -48,14 +44,8 @@
 
 <div class="container py-3">
     <h2 class="text-center mb-2"><strong>Settings Dashboard ⚙️</strong></h2>
-    <p class="text-center mt-1 mb-3">
-        <strong>Manage application configuration, CMS options, users, and roles</strong>
-    </p>
-
-    <!-- CMS Settings Section -->
     <div class="text-center section-title">CMS Settings</div>
     <div class="row row-cols-1 row-cols-md-3 g-3 justify-content-center mt-1">
-        <!-- Appearance Settings -->
         <div class="col-md-4">
             <a href="{{ route('settings.appearance') }}" class="text-decoration-none card-link-hover">
                 <div class="card h-100 text-center shadow-sm p-3">
@@ -63,19 +53,16 @@
                         <i class="fas fa-paint-brush fa-3x mb-2 text-danger"></i>
                         <h5 class="card-title"><strong>Appearance</strong></h5>
                         <p class="card-text text-muted">
-                            <strong>Change title, logo, and fonts.</strong>
+                            <strong>Modify company appearance.</strong>
                         </p>
                     </div>
                 </div>
             </a>
         </div>
-        <!-- (You can add more CMS-related cards here later) -->
     </div>
 
-    <!-- System Settings Section -->
     <div class="text-center section-title">System Settings</div>
     <div class="row row-cols-1 row-cols-md-3 g-3 justify-content-center mt-1">
-        <!-- Manage Users -->
         <div class="col-md-4">
             <a href="{{ route('users.index') }}" class="text-decoration-none card-link-hover">
                 <div class="card h-100 text-center shadow-sm p-3">
@@ -88,7 +75,6 @@
             </a>
         </div>
 
-        <!-- Manage Roles -->
         <div class="col-md-4">
             <a href="{{ route('roles.index') }}" class="text-decoration-none card-link-hover">
                 <div class="card h-100 text-center shadow-sm p-3">

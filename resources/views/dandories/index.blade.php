@@ -248,14 +248,14 @@ body, html {
                             <th>Line Produksi</th>
                             <th>Requestor</th>
                             <th>Customer</th>
-                            <th>Part Name</th>
-                            <th>Part No</th>
+                            <th>Nama Part</th>
+                            <th>No Part</th>
                             <th>Process</th>
                             <th>Machine</th>
                             <th>Qty</th>
                             <th>Planning</th>
                             <th>Status</th>
-                            <th>Assigned To</th>
+                            <th>Dandori Man</th>
                             <th width="100px">Action</th>
                         </tr>
                     </thead>

@@ -65,9 +65,6 @@
 
 <div class="container py-3">
     <h2 class="text-center mb-2 text-dark"><strong>Welcome, {{ $user->name }} 👋</strong></h2>
-    @if ($isView)
-        <p class="text-center text-dark mt-1 mb-3"><strong>Dandory request system</strong></p>
-    @endif
     
     <div class="row row-cols-1 row-cols-md-3 g-3 justify-content-center mt-3">        
         @if($isAdmin || $isRequestor || $isTeknisi || $isTeknisiAdmin)
@@ -192,7 +189,7 @@
                         <th class="text-dark"><strong>Qty (pcs)</strong></th>
                         <th class="text-dark"><strong>Planning Shift</strong></th>
                         <th class="text-dark"><strong>Status</strong></th>
-                        <th class="text-dark"><strong>Assigned To</strong></th>
+                        <th class="text-dark"><strong>Dandori Man</strong></th>
                     </tr>
                 </thead>
                 <tbody id="dandori-table-body">
