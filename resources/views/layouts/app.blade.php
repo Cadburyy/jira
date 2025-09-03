@@ -17,6 +17,62 @@
         : asset('favicon.ico');
 
     $fontHrefName = str_replace(' ', '+', $font);
+
+    // Get color settings or use defaults
+    $bgColor = $settings['bg_color'] ?? '#f8f9fa';
+    $navBgColor = $settings['nav_bg_color'] ?? '#ffffff';
+
+    // Helper function to determine if a color is "light" or "dark"
+    function getTextColor($hexColor) {
+        $hex = str_replace('#', '', $hexColor);
+        if (strlen($hex) == 3) {
+            $r = hexdec(substr($hex, 0, 1) . substr($hex, 0, 1));
+            $g = hexdec(substr($hex, 1, 1) . substr($hex, 1, 1));
+            $b = hexdec(substr($hex, 2, 1) . substr($hex, 2, 1));
+        } else {
+            $r = hexdec(substr($hex, 0, 2));
+            $g = hexdec(substr($hex, 2, 2));
+            $b = hexdec(substr($hex, 4, 2));
+        }
+        $luminance = (0.299 * $r + 0.587 * $g + 0.114 * $b) / 255;
+        return $luminance > 0.5 ? '#111827' : '#f8f9fa'; 
+    }
+    
+    // Helper function to convert hex to rgba
+    function hexToRgba($hex, $alpha) {
+        $hex = str_replace('#', '', $hex);
+        if (strlen($hex) == 3) {
+            $r = hexdec(substr($hex, 0, 1) . substr($hex, 0, 1));
+            $g = hexdec(substr($hex, 1, 1) . substr($hex, 1, 1));
+            $b = hexdec(substr($hex, 2, 1) . substr($hex, 2, 1));
+        } else {
+            $r = hexdec(substr($hex, 0, 2));
+            $g = hexdec(substr($hex, 2, 2));
+            $b = hexdec(substr($hex, 4, 2));
+        }
+        return "rgba($r, $g, $b, $alpha)";
+    }
+
+    // New helper to determine card background color based on main background
+    function getCardBgColor($bgColor) {
+        $hex = str_replace('#', '', $bgColor);
+        if (strlen($hex) == 3) {
+            $r = hexdec(substr($hex, 0, 1) . substr($hex, 0, 1));
+            $g = hexdec(substr($hex, 1, 1) . substr($hex, 1, 1));
+            $b = hexdec(substr($hex, 2, 1) . substr($hex, 2, 1));
+        } else {
+            $r = hexdec(substr($hex, 0, 2));
+            $g = hexdec(substr($hex, 2, 2));
+            $b = hexdec(substr($hex, 4, 2));
+        }
+        $luminance = (0.299 * $r + 0.587 * $g + 0.114 * $b) / 255;
+        return $luminance > 0.5 ? '#f3f4f6' : '#ffffff'; 
+    }
+
+    $bgTextColor = getTextColor($bgColor);
+    $navTextColor = getTextColor($navBgColor);
+    $cardBgColor = getCardBgColor($bgColor);
+    $cardTextColor = getTextColor($cardBgColor);
 @endphp
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
@@ -34,9 +90,12 @@
 
     <style>
         :root {
-            --bg: #f8f9fa;
-            --text: #111827;
-            --surface: #ffffff;
+            --bg: {{ $bgColor }};
+            --text: {{ $bgTextColor }};
+            --surface: {{ $navBgColor }};
+            --nav-text: {{ $navTextColor }};
+            --card-surface: {{ $cardBgColor }};
+            --card-text: {{ $cardTextColor }};
             --muted: #6b7280;
             --border: #e5e7eb;
         }
@@ -46,32 +105,38 @@
             color: var(--text);
             font-family: '{{ $font }}', system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
         }
+        
+        .navbar-brand,
+        .navbar-brand span,
+        .navbar .nav-link,
+        .dropdown-item {
+             color: var(--nav-text) !important;
+        }
 
         .navbar.navbar-light.bg-white,
         .dropdown-menu,
-        .card,
         .navbar-collapse {
             background-color: var(--surface) !important;
             color: var(--text) !important;
         }
 
-        .navbar .nav-link,
-        .dropdown-item {
-            color: var(--text) !important;
+        .card {
+            background-color: var(--card-surface) !important;
+            color: var(--card-text) !important;
         }
 
         .card-header {
-            background-color: var(--surface) !important;
+            background-color: var(--card-surface) !important;
             border-bottom: 1px solid var(--border) !important;
         }
-
+        
         .fixed-blur-navbar {
             position: fixed;
             top: 0;
             width: 100%;
             z-index: 1030;
             backdrop-filter: blur(5px);
-            background-color: rgba(255, 255, 255, 0.8);
+            background-color: {{ hexToRgba($navBgColor, 0.8) }};
         }
         #loading-bar {
             position: absolute;
