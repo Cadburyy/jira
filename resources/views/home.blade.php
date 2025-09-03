@@ -13,7 +13,6 @@
     body, html {
         overflow-x: hidden;
         overflow-y: auto;
-        background-color: #f8f9fa;
     }
     .card-link-hover:hover .card {
         transform: translateY(-5px);
@@ -35,26 +34,6 @@
     }
     .text-primary-dark {
         color: #0056b3;
-    }
-    .glass-card {
-        background: rgba(255, 255, 255, 0.15) !important;
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        border-radius: 1rem;
-        box-shadow: 0 8px 32px rgba(31, 38, 135, 0.2);
-        color: #fff;
-    }
-    .glass-card .card-header {
-        background: rgba(255, 255, 255, 0.2);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-        color: #fff;
-    }
-    .glass-card h5, 
-    .glass-card p, 
-    .glass-card li,
-    .glass-card strong {
-        color: #000000 !important;
     }
     tr[data-status="TO DO"] { background-color: #f8d7da !important; }
     tr[data-status="IN PROGRESS"] { background-color: #fff3cd !important; }
@@ -91,7 +70,7 @@
         <h3 class="text-center mb-1 text-dark"><strong>WIP Dashboard</strong></h3>
         <div class="row g-3 justify-content-center">
             <div class="col-lg-6 col-md-6 mb-3">
-                <div class="card glass-card h-100 p-2">
+                <div class="card h-100 p-3 shadow-sm">
                     <div class="card-header text-center">
                         <h5><strong>Ticket Status Breakdown</strong></h5>
                     </div>
@@ -112,7 +91,7 @@
             </div>
             @if(!$isView)
             <div class="col-lg-6 col-md-6 mb-3">
-                <div class="card glass-card h-100 p-2">
+                <div class="card h-100 p-3 shadow-sm">
                     <div class="card-header text-center">
                         <h5><strong>Tickets per Dandoriman</strong></h5>
                     </div>
@@ -136,7 +115,7 @@
         @if(!$isView)
         <div class="row mt-3">
             <div class="col-12">
-                <div class="card glass-card h-100 p-2">
+                <div class="card h-100 p-3 shadow-sm">
                     <div class="card-header text-center">
                         <h5><strong>Daily, Weekly & Monthly Tickets</strong></h5>
                     </div>

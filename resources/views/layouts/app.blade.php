@@ -53,7 +53,7 @@
         return "rgba($r, $g, $b, $alpha)";
     }
 
-    // New helper to determine card background color based on main background
+    // Helper to determine card background color based on main background
     function getCardBgColor($bgColor) {
         $hex = str_replace('#', '', $bgColor);
         if (strlen($hex) == 3) {
@@ -69,10 +69,29 @@
         return $luminance > 0.5 ? '#f3f4f6' : '#ffffff'; 
     }
 
+    // New helper to determine dropdown background color based on main background
+    function getDropdownBgColor($bgColor) {
+        $hex = str_replace('#', '', $bgColor);
+        if (strlen($hex) == 3) {
+            $r = hexdec(substr($hex, 0, 1) . substr($hex, 0, 1));
+            $g = hexdec(substr($hex, 1, 1) . substr($hex, 1, 1));
+            $b = hexdec(substr($hex, 2, 1) . substr($hex, 2, 1));
+        } else {
+            $r = hexdec(substr($hex, 0, 2));
+            $g = hexdec(substr($hex, 2, 2));
+            $b = hexdec(substr($hex, 4, 2));
+        }
+        $luminance = (0.299 * $r + 0.587 * $g + 0.114 * $b) / 255;
+        // Make dropdown darker on bright background, and lighter on dark background
+        return $luminance > 0.5 ? '#e9ecef' : '#212529';
+    }
+
     $bgTextColor = getTextColor($bgColor);
     $navTextColor = getTextColor($navBgColor);
     $cardBgColor = getCardBgColor($bgColor);
     $cardTextColor = getTextColor($cardBgColor);
+    $dropdownBgColor = getDropdownBgColor($bgColor);
+    $dropdownTextColor = getTextColor($dropdownBgColor);
 @endphp
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
@@ -96,6 +115,8 @@
             --nav-text: {{ $navTextColor }};
             --card-surface: {{ $cardBgColor }};
             --card-text: {{ $cardTextColor }};
+            --dropdown-surface: {{ $dropdownBgColor }};
+            --dropdown-text: {{ $dropdownTextColor }};
             --muted: #6b7280;
             --border: #e5e7eb;
         }
@@ -114,10 +135,18 @@
         }
 
         .navbar.navbar-light.bg-white,
-        .dropdown-menu,
         .navbar-collapse {
             background-color: var(--surface) !important;
             color: var(--text) !important;
+        }
+
+        .dropdown-menu {
+             background-color: var(--dropdown-surface) !important;
+             color: var(--dropdown-text) !important;
+        }
+
+        .dropdown-item {
+            color: var(--dropdown-text) !important;
         }
 
         .card {
@@ -174,13 +203,13 @@
 
         @media (max-width: 767px) {
             .navbar-collapse {
-                background-color: rgba(243, 244, 246, 0.95);
+                background-color: {{ hexToRgba($navBgColor, 0.95) }};
                 padding: 1rem;
                 border-radius: 0.75rem;
                 margin-top: 0.5rem;
                 animation: slideDown 0.3s ease-in-out;
             }
-            .navbar-nav .nav-item { border-bottom: 1px solid #e5e7eb; }
+            .navbar-nav .nav-item { border-bottom: 1px solid var(--border); }
             .navbar-nav .nav-item:last-child { border-bottom: none; }
             .navbar-nav .nav-link {
                 padding: 0.75rem 1rem;
@@ -192,7 +221,10 @@
                 border-radius: 0.5rem;
                 transform: translateX(5px);
             }
-            .dropdown-menu { background-color: transparent !important; border: none !important; }
+            .dropdown-menu { 
+                background-color: var(--dropdown-surface) !important; 
+                border: none !important; 
+            }
         }
         @keyframes slideDown {
             from { opacity: 0; transform: translateY(-20px); }
