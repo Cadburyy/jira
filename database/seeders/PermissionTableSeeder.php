@@ -15,7 +15,6 @@ class PermissionTableSeeder extends Seeder
      */
     public function run()
     {
-        // Define all permissions
         $permissions = [
            'role-list',
            'role-create',
@@ -32,7 +31,6 @@ class PermissionTableSeeder extends Seeder
              Permission::firstOrCreate(['name' => $permission]);
         }
 
-        // Define all roles
         $roles = [
             'Admin',
             'Teknisi',
@@ -40,13 +38,11 @@ class PermissionTableSeeder extends Seeder
             'AdminTeknisi',
             'Requestor'
         ];
-        
-        // Create the roles if they don't already exist
+
         foreach ($roles as $roleName) {
             Role::firstOrCreate(['name' => $roleName]);
         }
-        
-        // Assign permissions to the roles
+
         $adminRole = Role::where('name', 'Admin')->first();
         if ($adminRole) {
             $adminRole->syncPermissions(Permission::pluck('name'));
