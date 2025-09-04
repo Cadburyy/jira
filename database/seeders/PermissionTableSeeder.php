@@ -26,6 +26,7 @@ class PermissionTableSeeder extends Seeder
            'dandory-delete'
         ];
 
+        // Create the permissions if they don't already exist
         foreach ($permissions as $permission) {
              Permission::firstOrCreate(['name' => $permission]);
         }
