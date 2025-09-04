@@ -1,43 +1,58 @@
+JIRA
+This is a Laravel-based project that mimics the core functionalities of a task management tool.
 
-## 📄 Setup Instructions
+Setup Instructions
+1. Prerequisites
 
-1. Turn on XAMPP (Apache and MySQL)
+Before you begin, ensure you have the following installed and running:
 
-2. Install Laravel 12
+`XAMPP: With Apache and MySQL services enabled.`
+`Composer: For managing PHP dependencies.`
+`Node.js & npm: For managing frontend dependencies.`
 
-   `composer create-project laravel/laravel example-app`
+2. Project Installation
 
-3. Install Spatie Permission Package
+Clone the repository to your local machine:
+`git clone https://github.com/Cadburyy/jira.git`
 
-   `composer require spatie/laravel-permission`
+Navigate into the project directory:
+`cd jira`
 
-4. Publish the package’s configuration and migration files
+Install the backend dependencies:
+`composer install`
 
-   `php artisan vendor:publish --provider="Spatie\Permission\PermissionServiceProvider"`
+3. Environment Configuration
 
-5. Run migration table
+Copy the example environment file:
+`cp .env.example .env`
 
-   `php artisan migrate`
+Generate a new application key:
+`php artisan key:generate`
 
-6. Install Laravel UI and generate auth scaffolding
+Open the .env file and configure your database settings. Create a new database in phpMyAdmin (e.g., jira_db) and update the following lines:
+`DB_DATABASE=jira_db`
+`DB_USERNAME=root`
+`DB_PASSWORD=`
 
-   `composer require laravel/ui`
-   `php artisan ui bootstrap --auth`
+4. Database Setup
 
-7. Compile the frontend
+Run the migrations and seeders to create your database tables and populate them with initial data, including roles, permissions, and an administrator user.
+`php artisan migrate:fresh --seed`
 
-   `npm install`
-   `npm run build`
+5. Frontend Setup
 
-8. Run the seeder with:
+Install the frontend dependencies and compile your assets.
+`npm install`
+`npm run build`
 
-    `php artisan db:seed --class=PermissionTableSeeder`
-    `php artisan db:seed --class=CreateAdminUserSeeder`
+6. Starting the Application
 
-9. Run the frontend dev server:
+You can now start the development servers to run your application.
 
-    `npm run dev`
+Start the Laravel development server:
+`php artisan serve`
 
-10. Start the Laravel development server:
+In a new terminal, start the frontend dev server:
+`npm run dev`
 
-    `php artisan serve`
+Your application should now be accessible in your web browser at http://localhost:8000.
