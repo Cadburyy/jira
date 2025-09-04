@@ -16,7 +16,7 @@ class UserController extends Controller
 {
     public function index(Request $request): View
     {
-        $roleOrder = ['Admin' => 1, 'Requestor' => 2, 'Teknisi' => 3];
+        $roleOrder = ['Admin' => 1, 'AdminTeknisi' => 2, 'Views' => 3, 'Requestor' => 4, 'Teknisi' => 5];
 
         $users = User::all()->sortBy(function ($user) use ($roleOrder) {
             $userRole = $user->getRoleNames()->first();
