@@ -2,17 +2,20 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 
 class PermissionTableSeeder extends Seeder
 {
     /**
      * Run the database seeds.
+     *
+     * @return void
      */
-    public function run(): void
+    public function run()
     {
+        // Define all permissions
         $permissions = [
            'role-list',
            'role-create',
@@ -24,8 +27,56 @@ class PermissionTableSeeder extends Seeder
            'dandory-delete'
         ];
 
+        // Create the permissions if they don't already exist
         foreach ($permissions as $permission) {
-             Permission::create(['name' => $permission]);
+             Permission::firstOrCreate(['name' => $permission]);
+        }
+
+        // Define all roles
+        $roles = [
+            'Admin',
+            'Teknisi',
+            'Views',
+            'AdminTeknisi',
+            'Requestor'
+        ];
+        
+        // Create the roles if they don't already exist
+        foreach ($roles as $roleName) {
+            Role::firstOrCreate(['name' => $roleName]);
+        }
+        
+        // Assign permissions to the roles
+        $adminRole = Role::where('name', 'Admin')->first();
+        if ($adminRole) {
+            $adminRole->syncPermissions(Permission::pluck('name'));
+        }
+
+        $teknisiRole = Role::where('name', 'Teknisi')->first();
+        if ($teknisiRole) {
+            $teknisiRole->givePermissionTo('dandory-list');
+        }
+
+        $viewsRole = Role::where('name', 'Views')->first();
+        if ($viewsRole) {
+            $viewsRole->givePermissionTo('dandory-list');
+        }
+
+        $adminTeknisiRole = Role::where('name', 'AdminTeknisi')->first();
+        if ($adminTeknisiRole) {
+            $adminTeknisiRole->givePermissionTo([
+                'dandory-list',
+                'dandory-create',
+                'dandory-edit'
+            ]);
+        }
+
+        $requestorRole = Role::where('name', 'Requestor')->first();
+        if ($requestorRole) {
+            $requestorRole->givePermissionTo([
+                'dandory-list',
+                'dandory-create'
+            ]);
         }
     }
 }
