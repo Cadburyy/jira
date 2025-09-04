@@ -58,6 +58,17 @@ body, html {
 .dropdown-menu .dropdown-item:hover i {
     color: #fff !important;
 }
+@media (min-width: 992px) {
+    .container {
+        max-width: 1400px;
+    }
+    .card-body.p-0 {
+        padding: 0 1rem !important;
+    }
+    .table {
+        min-width: 1200px;
+    }
+}
 </style>
 
 <div class="container py-4">
@@ -76,8 +87,8 @@ body, html {
     <div class="card shadow-sm mb-4">
         <div class="card-header bg-white d-flex justify-content-between align-items-center">
             <h5 class="mb-0">Daily Dandoriman Counter</h5>
-            <form action="{{ route('dandories.index') }}" method="GET" class="d-flex align-items-center">
-                <label for="date-filter" class="form-label mb-0 me-2">Filter by Date:</label>
+            <form action="{{ route('dandories.index') }}" method="GET" class="d-flex flex-column flex-md-row align-items-md-center">
+                <label for="date-filter" class="form-label mb-2 me-md-2 mb-md-0">Filter by Date:</label>
                 <input type="date" name="date" id="date-filter" class="form-control" value="{{ $dateFilter }}" onchange="this.form.submit()">
             </form>
         </div>
@@ -343,7 +354,6 @@ body, html {
     </div>
 </div>
 
-{{-- Confirmation Modal --}}
 <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -366,7 +376,6 @@ body, html {
     </div>
 </div>
 
-{{-- Download Modal --}}
 <div class="modal fade" id="downloadModal" tabindex="-1" aria-labelledby="downloadModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">

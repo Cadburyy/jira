@@ -115,6 +115,12 @@
     <div class="mt-4">
         {!! $roles->links('pagination::bootstrap-5') !!}
     </div>
+    
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <a class="btn btn-secondary" href="{{ route('settings.index') }}">
+            <i class="fa fa-arrow-left me-2"></i> Back
+        </a>
+    </div>
 </div>
 
 <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
