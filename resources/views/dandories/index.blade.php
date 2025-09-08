@@ -63,8 +63,8 @@ body, html {
 .modal-dialog {
     display: flex;
     align-items: center;
-    min-height: calc(100vh - 1rem); /* Ensures vertical centering */
-    margin: 0 auto; /* Horizontal centering */
+    min-height: calc(100vh - 1rem);
+    margin: 0 auto;
     width: auto;
 }
 .modal-content {
