@@ -1,7 +1,6 @@
 @extends('layouts.app')
 @section('content')
 <style>
-/* Existing styles... */
 tr[data-status="TO DO"] {
     background-color: #f8d7da !important;
 }
