@@ -1,6 +1,7 @@
 @extends('layouts.app')
 @section('content')
 <style>
+/* Existing styles... */
 tr[data-status="TO DO"] {
     background-color: #f8d7da !important;
 }
@@ -58,6 +59,17 @@ body, html {
 .dropdown-menu .dropdown-item:hover i {
     color: #fff !important;
 }
+
+.modal-dialog {
+    display: flex;
+    align-items: center;
+    min-height: calc(100vh - 1rem); /* Ensures vertical centering */
+    margin: 0 auto; /* Horizontal centering */
+    width: auto;
+}
+.modal-content {
+    flex-grow: 1;
+}
 @media (min-width: 992px) {
     .container {
         max-width: 1400px;
@@ -107,11 +119,11 @@ body, html {
                         @foreach ($sortedTeknisiUsers->chunk(2) as $chunk)
                         <tr>
                             @foreach ($chunk as $user)
-                                <td>{{ $user->name }}</td>
-                                <td>{{ $user->daily_count }}</td>
+                            <td>{{ $user->name }}</td>
+                            <td>{{ $user->daily_count }}</td>
                             @endforeach
                             @if ($chunk->count() < 2)
-                                <td colspan="2"></td>
+                            <td colspan="2"></td>
                             @endif
                         </tr>
                         @endforeach
@@ -387,37 +399,29 @@ body, html {
                 <form id="download-form" action="" method="GET">
                     <div id="wip-options" class="download-options">
                         <h6>WIP Ticket Filters</h6>
-                        <div class="form-check mb-3">
-                            <input class="form-check-input" type="checkbox" id="selectAllWip" name="select_all">
-                            <label class="form-check-label" for="selectAllWip">
-                                Select All WIP Tickets
-                            </label>
+                        <div class="mb-3">
+                            <label for="wip-date-filter" class="form-label">Filter by Creation Date</label>
+                            <input type="date" name="creation_date" id="wip-date-filter" class="form-control">
                         </div>
-                        <div id="wip-filters-specific">
-                            <div class="mb-3">
-                                <label for="wip-date-filter" class="form-label">Filter by Creation Date</label>
-                                <input type="date" name="creation_date" id="wip-date-filter" class="form-control">
+                        <div class="mb-3">
+                            <label class="form-label">Filter by Status</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="statuses[]" value="TO DO" id="status-todo">
+                                <label class="form-check-label" for="status-todo">
+                                    TO DO
+                                </label>
                             </div>
-                            <div class="mb-3">
-                                <label class="form-label">Filter by Status</label>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="statuses[]" value="TO DO" id="status-todo">
-                                    <label class="form-check-label" for="status-todo">
-                                        TO DO
-                                    </label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="statuses[]" value="IN PROGRESS" id="status-inprogress">
-                                    <label class="form-check-label" for="status-inprogress">
-                                        IN PROGRESS
-                                    </label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="statuses[]" value="PENDING" id="status-pending">
-                                    <label class="form-check-label" for="status-pending">
-                                        PENDING
-                                    </label>
-                                </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="statuses[]" value="IN PROGRESS" id="status-inprogress">
+                                <label class="form-check-label" for="status-inprogress">
+                                    IN PROGRESS
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="statuses[]" value="PENDING" id="status-pending">
+                                <label class="form-check-label" for="status-pending">
+                                    PENDING
+                                </label>
                             </div>
                         </div>
                     </div>
