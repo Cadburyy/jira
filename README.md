@@ -1,7 +1,8 @@
-JIRA
+Dandori Jira
 This is a Laravel-based project that mimics the core functionalities of a task management tool.
 
 Setup Instructions
+
 1. Prerequisites
 
 Before you begin, ensure you have the following installed and running:
