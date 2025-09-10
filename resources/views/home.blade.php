@@ -65,7 +65,7 @@
             <strong>{{ session('status') }}</strong>
         </div>
     @endif
-    @if($isAdmin || $isTeknisi || $isTeknisiAdmin || $isView)
+    
     <div class="row mt-4">
         <h3 class="text-center mb-1 text-dark"><strong>WIP Dashboard</strong></h3>
         <div class="row g-3 justify-content-center">
@@ -112,44 +112,41 @@
             </div>
             @endif
         </div>
-        @if(!$isView)
-        <div class="row mt-3">
-            <div class="col-12">
-                <div class="card h-100 p-3 shadow-sm">
-                    <div class="card-header text-center">
-                        <h5><strong>Daily, Weekly & Monthly Tickets</strong></h5>
+    </div>
+    <div class="row mt-3">
+        <div class="col-12">
+            <div class="card h-100 p-3 shadow-sm">
+                <div class="card-header text-center">
+                    <h5><strong>Daily, Weekly & Monthly Tickets</strong></h5>
+                </div>
+                <div class="card-body">
+                    <div class="btn-group mb-2 d-flex justify-content-center" role="group">
+                        <button type="button" class="btn btn-sm btn-primary" id="dailyBtn"><strong>Daily</strong></button>
+                        <button type="button" class="btn btn-sm btn-secondary" id="weeklyBtn"><strong>Weekly</strong></button>
+                        <button type="button" class="btn btn-sm btn-secondary" id="monthlyBtn"><strong>Monthly</strong></button>
                     </div>
-                    <div class="card-body">
-                        <div class="btn-group mb-2 d-flex justify-content-center" role="group">
-                            <button type="button" class="btn btn-sm btn-primary" id="dailyBtn"><strong>Daily</strong></button>
-                            <button type="button" class="btn btn-sm btn-secondary" id="weeklyBtn"><strong>Weekly</strong></button>
-                            <button type="button" class="btn btn-sm btn-secondary" id="monthlyBtn"><strong>Monthly</strong></button>
-                        </div>
-                        <div id="daily-filter-container" class="mb-2">
-                            <div class="row g-2">
-                                <div class="col">
-                                    <input type="date" id="start-date" class="form-control form-control-sm" title="Start Date">
-                                </div>
-                                <div class="col">
-                                    <input type="date" id="end-date" class="form-control form-control-sm" title="End Date">
-                                </div>
+                    <div id="daily-filter-container" class="mb-2">
+                        <div class="row g-2">
+                            <div class="col">
+                                <input type="date" id="start-date" class="form-control form-control-sm" title="Start Date">
+                            </div>
+                            <div class="col">
+                                <input type="date" id="end-date" class="form-control form-control-sm" title="End Date">
                             </div>
                         </div>
-                        <div class="row">
-                            <div class="col-md-8">
-                                <canvas id="resolutionChart"></canvas>
-                            </div>
-                            <div class="col-md-4 d-flex align-items-center">
-                                <ul id="resolution-legend" class="list-unstyled w-100"></ul>
-                            </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-8">
+                            <canvas id="resolutionChart"></canvas>
+                        </div>
+                        <div class="col-md-4 d-flex align-items-center">
+                            <ul id="resolution-legend" class="list-unstyled w-100"></ul>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        @endif
     </div>
-    @endif
     @if($isView)
     <div class="row mt-4">
         <h3 class="text-center mb-3 text-dark"><strong>WIP Dandory Tickets</strong></h3>
@@ -451,15 +448,16 @@
         }
         const isView = @json($isView);
         const isAdminOrTeknisi = @json($isAdmin || $isTeknisi || $isTeknisiAdmin);
-        if (isView || isAdminOrTeknisi) {
+        const isRequestor = @json($isRequestor);
+        if (isView || isAdminOrTeknisi || isRequestor) {
             createTicketStatusChart();
         }
-        if (isAdminOrTeknisi) {
+        if (isAdminOrTeknisi || isRequestor) {
             createDandoriManChart();
         }
         if(dailyBtn) {
             filterDaily();
-        } else if (isAdminOrTeknisi) {
+        } else if (isAdminOrTeknisi || isRequestor) {
             createResolutionChart('bar',[],[],'');
         }
         if (isView) {

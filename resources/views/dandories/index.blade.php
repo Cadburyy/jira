@@ -115,7 +115,7 @@
 
         <div id="message-container" class="my-3"></div>
 
-        @if (Auth::user()->hasAnyRole(['Admin', 'AdminTeknisi']))
+        @if (Auth::user()->hasAnyRole(['Admin', 'AdminTeknisi', 'Requestor']))
             <div class="card shadow-sm mb-4">
                 <div class="card-header bg-white d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">Daily Dandoriman Counter</h5>

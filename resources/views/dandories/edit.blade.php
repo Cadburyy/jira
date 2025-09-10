@@ -92,7 +92,7 @@
                         </select>
                     </div>
                 </div>
-                @if(Auth::user()->hasRole('Admin'))
+                @if(Auth::user()->hasRole(['Admin', 'AdminTeknisi']))
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="status" class="form-label"><strong>Status:</strong></label>
