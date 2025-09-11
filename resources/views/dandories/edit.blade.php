@@ -35,43 +35,43 @@
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="customer" class="form-label"><strong>Customer:</strong></label>
-                        <input type="text" name="customer" class="form-control" placeholder="Customer" value="{{ old('customer', $dandory->customer) }}" required>
+                        <input type="text" name="customer" class="form-control" placeholder="Customer" value="{{ old('customer', $dandory->customer) }}" required autocomplete="off">
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="line_production" class="form-label"><strong>Line Produksi:</strong></label>
-                        <input type="text" name="line_production" class="form-control" placeholder="Line Produksi" value="{{ old('line_production', $dandory->line_production) }}" required>
+                        <input type="text" name="line_production" class="form-control" placeholder="Line Produksi" value="{{ old('line_production', $dandory->line_production) }}" required autocomplete="off">
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="nama_part" class="form-label"><strong>Nama Part:</strong></label>
-                        <input type="text" name="nama_part" class="form-control" placeholder="Nama Part" value="{{ old('nama_part', $dandory->nama_part) }}" required>
+                        <input type="text" name="nama_part" class="form-control" placeholder="Nama Part" value="{{ old('nama_part', $dandory->nama_part) }}" required autocomplete="off">
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="nomor_part" class="form-label"><strong>Nomor Part:</strong></label>
-                        <input type="text" name="nomor_part" class="form-control" placeholder="Nomor Part" value="{{ old('nomor_part', $dandory->nomor_part) }}" required>
+                        <input type="text" name="nomor_part" class="form-control" placeholder="Nomor Part" value="{{ old('nomor_part', $dandory->nomor_part) }}" required autocomplete="off">
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="proses" class="form-label"><strong>Proses:</strong></label>
-                        <input type="text" name="proses" class="form-control" placeholder="Proses" value="{{ old('proses', $dandory->proses) }}" required>
+                        <input type="text" name="proses" class="form-control" placeholder="Proses" value="{{ old('proses', $dandory->proses) }}" required autocomplete="off">
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="mesin" class="form-label"><strong>Mesin:</strong></label>
-                        <input type="text" name="mesin" class="form-control" placeholder="Mesin" value="{{ old('mesin', $dandory->mesin) }}" required>
+                        <input type="text" name="mesin" class="form-control" placeholder="Mesin" value="{{ old('mesin', $dandory->mesin) }}" required autocomplete="off">
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="qty_pcs" class="form-label"><strong>Qty. PCS:</strong></label>
-                        <input type="number" name="qty_pcs" class="form-control" placeholder="Qty. PCS" value="{{ old('qty_pcs', $dandory->qty_pcs) }}" required>
+                        <input type="number" name="qty_pcs" class="form-control" placeholder="Qty. PCS" value="{{ old('qty_pcs', $dandory->qty_pcs) }}" required autocomplete="off">
                     </div>
                 </div>
                 <div class="col-md-6">

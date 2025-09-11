@@ -26,11 +26,11 @@
             <div class="row g-3">
                 <div class="col-md-6">
                     <label for="name" class="form-label"><strong>Name:</strong></label>
-                    <input type="text" name="name" id="name" placeholder="Name" class="form-control" value="{{ old('name') }}">
+                    <input type="text" name="name" id="name" placeholder="Name" class="form-control" value="{{ old('name') }}" autocomplete="off">
                 </div>
                 <div class="col-md-6">
                     <label for="email" class="form-label"><strong>Email:</strong></label>
-                    <input type="email" name="email" id="email" placeholder="Email" class="form-control" value="{{ old('email') }}">
+                    <input type="email" name="email" id="email" placeholder="Email" class="form-control" value="{{ old('email') }}" autocomplete="off">
                 </div>
                 <div class="col-md-6">
                     <label for="password" class="form-label"><strong>Password:</strong></label>

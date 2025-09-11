@@ -3,16 +3,14 @@
 @section('content')
 <div class="d-flex justify-content-center align-items-center vh-100">
     <div class="row w-100 justify-content-center">
-        <div class="col-md-6 col-lg-5"> {{-- Changed column size to control card width --}}
+        <div class="col-md-6 col-lg-5">
             <div class="card shadow-lg">
                 <div class="row g-0">
-                    {{-- Top side: Image --}}
-                    <div class="col-12 d-flex align-items-center justify-content-center bg-light p-4"> {{-- Image now takes full width on top --}}
+                    <div class="col-12 d-flex align-items-center justify-content-center bg-light p-4">
                         <img src="{{ asset('images/cnk.png') }}" alt="CNK" class="img-fluid" style="max-height: 250px;">
                     </div>
 
-                    {{-- Bottom side: Form --}}
-                    <div class="col-12 p-4"> {{-- Form now takes full width on the bottom --}}
+                    <div class="col-12 p-4">
                         <h4 class="mb-4 text-center">{{ __('Login') }}</h4>
 
                         <form method="POST" action="{{ route('login') }}">
@@ -22,7 +20,7 @@
                                 <label for="email" class="form-label">{{ __('Email Address') }}</label>
                                 <input id="email" type="email"
                                     class="form-control @error('email') is-invalid @enderror"
-                                    name="email" value="{{ old('email') }}" required autocomplete="email" autofocus>
+                                    name="email" value="{{ old('email') }}" required autocomplete="off" autofocus>
                                 @error('email')
                                     <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
                                 @enderror
@@ -32,7 +30,7 @@
                                 <label for="password" class="form-label">{{ __('Password') }}</label>
                                 <input id="password" type="password"
                                     class="form-control @error('password') is-invalid @enderror"
-                                    name="password" required autocomplete="current-password">
+                                    name="password" required autocomplete="off">
                                 @error('password')
                                     <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
                                 @enderror
