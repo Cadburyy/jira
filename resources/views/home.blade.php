@@ -42,7 +42,6 @@ tr[data-status="PENDING"] { background-color: #e2e3e5 !important; }
 tr[data-status] td { background-color: inherit; }
 strong { font-weight: bold; }
 
-/* Removed custom .chart-and-text-container as Bootstrap will handle layout */
 .chart-container {
     width: 100%;
     max-width: 250px;
@@ -73,18 +72,18 @@ strong { font-weight: bold; }
         <strong>{{ session('status') }}</strong>
     </div>
 @endif
-
+<h3 class="text-center mt-4 text-dark"><strong>Dashboard</strong></h3>
 <div class="row mt-4">
-    <h3 class="text-center mb-1 text-dark"><strong>Dandori Dashboard</strong></h3>
+    <h3 class="text-center mb-1 text-dark"><strong Dashboard</strong></h3>
     <div class="row g-3 justify-content-center">
         <div class="col-lg-6 col-md-6 mb-3">
             <div class="card h-100 p-3 shadow-sm">
                 <div class="card-header text-center">
-                    <h5><strong>Ticket Status Breakdown</strong></h5>
+                    <h5><strong>Status Ticket</strong></h5>
                 </div>
                 <div class="card-body d-flex flex-column align-items-center">
                     <div class="row w-100 g-3 d-flex align-items-center justify-content-center">
-                        <div class="col-md-6 d-flex mt-md-4 justify-content-center align-items-center">
+                        <div class="col-md-6 d-flex justify-content-center align-items-center">
                             <div class="chart-container">
                                 <canvas id="ticketStatusChart"></canvas>
                             </div>
@@ -107,7 +106,7 @@ strong { font-weight: bold; }
         <div class="col-lg-6 col-md-6 mb-3">
             <div class="card h-100 p-3 shadow-sm">
                 <div class="card-header text-center">
-                    <h5><strong>Tickets per Dandoriman</strong></h5>
+                    <h5><strong>Dandoriman Ticket</strong></h5>
                 </div>
                 <div class="card-body d-flex flex-column align-items-center">
                     <div class="row w-100 g-3 d-flex align-items-center justify-content-center">

@@ -18,7 +18,7 @@
 
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Dandory Ticket #{{ $dandory->ddcnk_id }}</h2>
+        <h2>#{{ $dandory->ddcnk_id }}</h2>
         <a class="btn btn-secondary" href="{{ route('dandories.index') }}">
             <i class="fa fa-arrow-left"></i> Back to list
         </a>

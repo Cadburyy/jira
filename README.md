@@ -57,3 +57,27 @@ In a new terminal, start the frontend dev server:
 `npm run dev`
 
 Your application should now be accessible in your web browser at http://localhost:8000.
+
+
+Roles Breakdown :
+
+`Admin`
+Administrator of the website, able to create and manage users, roles, and ticket itself as well as global theme changing and downloading ticket data.
+
+`AdminTeknisi`
+Administrator that able to download ticket reports aswell and helps :
+Requestor - Edit ticket if there's a mistype
+Teknisi - Choosing the teknisi for the ticket
+
+`Requestor`
+Requesting a ticket that are ordered from the supplier
+
+`Teknisi`
+Work to the ticket created by requestor and also changes the status of the ticket such as :
+TO DO - Ticket just been created and now ready to be worked on
+IN PROGRESS - Started working to the ticket (Check IN)
+PENDING - Paused the work due to under some circumstances
+FINISH - Work is done and the ticket is closed (Check OUT)
+
+`Views`
+Able to see to only "Status Ticket" chart and a table on the home page where it shows a table of WIP Tickets.
