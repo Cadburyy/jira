@@ -1,9 +1,3 @@
-Got it ✅ I’ll tidy up your **Dandori Jira README draft** with cleaner formatting, better language flow, and consistent spacing so you can copy–paste it directly without editing.
-
-Here’s the improved version:
-
----
-
 # Dandori Jira
 
 A **Laravel-based project** that mimics the core functionalities of a task management tool.
@@ -155,7 +149,3 @@ Your application should now be accessible at:
 
   * "Status Ticket" chart
   * Table of WIP (Work in Progress) tickets on the homepage
-
----
-
-Would you like me to also **add badges** (e.g., Laravel version, PHP version, Node.js) at the top so your README looks more professional like open-source projects on GitHub?
