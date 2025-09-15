@@ -1,83 +1,161 @@
-Dandori Jira
-This is a Laravel-based project that mimics the core functionalities of a task management tool.
+Got it ✅ I’ll tidy up your **Dandori Jira README draft** with cleaner formatting, better language flow, and consistent spacing so you can copy–paste it directly without editing.
 
-Setup Instructions
+Here’s the improved version:
 
-1. Prerequisites
+---
 
-Before you begin, ensure you have the following installed and running:
+# Dandori Jira
 
-`XAMPP: With Apache and MySQL services enabled.`
-`Composer: For managing PHP dependencies.`
-`Node.js & npm: For managing frontend dependencies.`
+A **Laravel-based project** that mimics the core functionalities of a task management tool.
 
-2. Project Installation
+---
+
+## 🚀 Setup Instructions
+
+### 1. Prerequisites
+
+Before you begin, make sure the following are installed and running:
+
+* **XAMPP** (Apache and MySQL services enabled)
+* **Composer** (for managing PHP dependencies)
+* **Node.js & npm** (for managing frontend dependencies)
+
+---
+
+### 2. Project Installation
 
 Clone the repository to your local machine:
-`git clone https://github.com/Cadburyy/jira.git`
+
+```bash
+git clone https://github.com/Cadburyy/jira.git
+```
 
 Navigate into the project directory:
-`cd jira`
 
-Install the backend dependencies:
-`composer install`
+```bash
+cd jira
+```
 
-3. Environment Configuration
+Install backend dependencies:
+
+```bash
+composer install
+```
+
+---
+
+### 3. Environment Configuration
 
 Copy the example environment file:
-`cp .env.example .env`
+
+```bash
+cp .env.example .env
+```
 
 Generate a new application key:
-`php artisan key:generate`
 
-Open the .env file and configure your database settings. Create a new database in phpMyAdmin (e.g., jira_db) and update the following lines:
-`DB_DATABASE=jira_db`
-`DB_USERNAME=root`
-`DB_PASSWORD=`
+```bash
+php artisan key:generate
+```
 
-4. Database Setup
+Open the `.env` file and configure your database settings.
+For example, create a new database in **phpMyAdmin** (e.g., `jira_db`) and update the following lines:
 
-Run the migrations and seeders to create your database tables and populate them with initial data, including roles, permissions, and an administrator user.
-`php artisan migrate:fresh --seed`
+```env
+DB_DATABASE=jira_db
+DB_USERNAME=root
+DB_PASSWORD=
+```
 
-5. Frontend Setup
+---
 
-Install the frontend dependencies and compile your assets.
-`npm install`
-`npm run build`
+### 4. Database Setup
 
-6. Starting the Application
+Run migrations and seeders to create tables and populate them with initial data (roles, permissions, and an admin user):
 
-You can now start the development servers to run your application.
+```bash
+php artisan migrate:fresh --seed
+```
+
+---
+
+### 5. Frontend Setup
+
+Install frontend dependencies and build assets:
+
+```bash
+npm install
+npm run build
+```
+
+---
+
+### 6. Starting the Application
 
 Start the Laravel development server:
-`php artisan serve`
+
+```bash
+php artisan serve
+```
 
 In a new terminal, start the frontend dev server:
-`npm run dev`
 
-Your application should now be accessible in your web browser at http://localhost:8000.
+```bash
+npm run dev
+```
 
+Your application should now be accessible at:
+👉 [http://localhost:8000](http://localhost:8000)
 
-Roles Breakdown :
+---
 
-`Admin`
-Administrator of the website, able to create and manage users, roles, and ticket itself as well as global theme changing and downloading ticket data.
+## 👥 Roles Breakdown
 
-`AdminTeknisi`
-Administrator that able to download ticket reports aswell and helps :
-Requestor - Edit ticket if there's a mistype
-Teknisi - Choosing the teknisi for the ticket
+### **Admin**
 
-`Requestor`
-Requesting a ticket that are ordered from the supplier
+* Full administrator access
+* Manage users, roles, and tickets
+* Change global theme
+* Download ticket data
 
-`Teknisi`
-Work to the ticket created by requestor and also changes the status of the ticket such as :
-TO DO - Ticket just been created and now ready to be worked on
-IN PROGRESS - Started working to the ticket (Check IN)
-PENDING - Paused the work due to under some circumstances
-FINISH - Work is done and the ticket is closed (Check OUT)
+---
 
-`Views`
-Able to see to only "Status Ticket" chart and a table on the home page where it shows a table of WIP Tickets.
+### **AdminTeknisi**
+
+* Able to download ticket reports
+* Assists other roles:
+
+  * **Requestor** → Edit tickets if there are mistakes
+  * **Teknisi** → Assign a technician to a ticket
+
+---
+
+### **Requestor**
+
+* Create new tickets (ordered from supplier)
+
+---
+
+### **Teknisi**
+
+* Work on tickets created by requestors
+* Update ticket status:
+
+  * **TO DO** → Ticket created, ready to be worked on
+  * **IN PROGRESS** → Work started (Check In)
+  * **PENDING** → Work paused due to circumstances
+  * **FINISH** → Work completed and closed (Check Out)
+
+---
+
+### **Views**
+
+* Read-only role
+* Can only view:
+
+  * "Status Ticket" chart
+  * Table of WIP (Work in Progress) tickets on the homepage
+
+---
+
+Would you like me to also **add badges** (e.g., Laravel version, PHP version, Node.js) at the top so your README looks more professional like open-source projects on GitHub?
