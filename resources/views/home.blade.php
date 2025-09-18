@@ -270,14 +270,12 @@ $isTeknisiAdmin = $user->hasRole('AdminTeknisi');
         });
     }
 
-    // Helper function to update the chart data and legend
     function updateChart(chart, newData, chartColors) {
         chart.data.datasets[0].data = newData.data;
         chart.data.labels = newData.labels;
-        chart.data.datasets[0].backgroundColor = chartColors; // Keep colors consistent
+        chart.data.datasets[0].backgroundColor = chartColors;
         chart.update();
 
-        // Check if there is a corresponding legend element
         if (chart.canvas.id === 'ticketStatusChart') {
             updateLegend(newData.labels, newData.data, chartColors, document.getElementById('ticket-status-legend'));
         } else if (chart.canvas.id === 'dandoriManChart') {
@@ -537,7 +535,6 @@ $isTeknisiAdmin = $user->hasRole('AdminTeknisi');
                         }, 15000); 
                     }
 
-                    // Update Table
                     tableBody.innerHTML = '';
                     filteredTicketsData.forEach(ticket => {
                         const row = document.createElement('tr');
@@ -559,7 +556,6 @@ $isTeknisiAdmin = $user->hasRole('AdminTeknisi');
                         tableBody.appendChild(row);
                     });
 
-                    // Update Charts
                     if (ticketStatusChart) {
                         updateChart(ticketStatusChart, chartsData.ticketStatusChartData, ticketStatusChartColors);
                     }
@@ -575,7 +571,6 @@ $isTeknisiAdmin = $user->hasRole('AdminTeknisi');
                 }
             }
 
-            // Initial fetch on page load
             fetchAndUpdateData();
             setInterval(fetchAndUpdateData, 30000);
         }

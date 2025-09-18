@@ -170,8 +170,6 @@ class DandoryController extends Controller
         $user = Auth::user();
         $newStatus = $request->input('status');
 
-        // Allow Admins and AdminTeknisi to update any ticket status.
-        // Allow a Teknisi to update the status of tickets assigned to them.
         if (!($user->hasRole('Admin') || $user->hasRole('AdminTeknisi')) && $dandory->assigned_to != $user->id) {
             return response()->json(['success' => false, 'error' => 'You can only update the status of tickets assigned to you.'], 403);
         }
@@ -233,8 +231,6 @@ class DandoryController extends Controller
         $user = Auth::user();
         $assignedToId = $request->input('assigned_to');
 
-        // Allow Admins and AdminTeknisi to assign to anyone.
-        // A Teknisi can only assign themselves to a ticket, and only if it's currently unassigned.
         if (($user->hasRole('Teknisi') && ($dandory->assigned_to !== null || $assignedToId != $user->id)) && 
             !($user->hasRole('Admin') || $user->hasRole('AdminTeknisi'))) {
             return response()->json(['success' => false, 'error' => 'You cannot assign a ticket that is already assigned to someone else or to a different user.'], 403);
