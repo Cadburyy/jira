@@ -114,10 +114,54 @@ class HomeController extends Controller
                 'planning_shift' => $dandory->planning_shift,
                 'status' => $dandory->status,
                 'assigned_to_name' => $assignedTo ? $assignedTo->name : 'N/A',
-                'updated_at' => $dandory->updated_at, // Add the updated_at timestamp
+                'updated_at' => $dandory->updated_at,
             ];
         });
 
         return response()->json($tickets);
+    }
+
+    /**
+     * Get chart data for auto-refresh.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getChartData()
+    {
+        $ticketStatusData = Dandory::select('status', DB::raw('count(*) as count'))
+            ->groupBy('status')
+            ->pluck('count', 'status')
+            ->all();
+
+        $teknisiUsers = User::role('Teknisi')->get();
+
+        $dandorimanData = Dandory::select('assigned_to', DB::raw('count(*) as count'))
+            ->whereNotNull('assigned_to')
+            ->groupBy('assigned_to')
+            ->get();
+
+        $dandoriManLabels = [];
+        $dandoriManCounts = [];
+        foreach ($teknisiUsers as $teknisi) {
+            $dandoriManLabels[] = $teknisi->name;
+            $ticketCount = $dandorimanData->firstWhere('assigned_to', $teknisi->id);
+            $dandoriManCounts[] = $ticketCount ? $ticketCount->count : 0;
+        }
+
+        return response()->json([
+            'ticketStatusChartData' => [
+                'labels' => ['TO DO', 'IN PROGRESS', 'PENDING', 'FINISH'],
+                'data' => [
+                    $ticketStatusData['TO DO'] ?? 0,
+                    $ticketStatusData['IN PROGRESS'] ?? 0,
+                    $ticketStatusData['PENDING'] ?? 0,
+                    $ticketStatusData['FINISH'] ?? 0,
+                ],
+            ],
+            'dandoriManChartData' => [
+                'labels' => $dandoriManLabels,
+                'data' => $dandoriManCounts,
+            ]
+        ]);
     }
 }

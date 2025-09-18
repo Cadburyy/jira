@@ -46,7 +46,6 @@ $isTeknisiAdmin = $user->hasRole('AdminTeknisi');
         width: 100%;
         max-width: 250px;
     }
-    
 </style>
 
 <div class="container py-3">
@@ -88,7 +87,7 @@ $isTeknisiAdmin = $user->hasRole('AdminTeknisi');
                                 </div>
                             </div>
                             <div class="col-md-6 d-flex justify-content-center">
-                                <ul class="list-unstyled mt-2 w-100">
+                                <ul id="ticket-status-legend" class="list-unstyled mt-2 w-100">
                                     @foreach($ticketStatusChartData['labels'] as $key => $label)
                                     <li>
                                         <span style="display:inline-block;width:10px;height:10px;background-color:{{ $ticketStatusChartData['colors'][$key] }};margin-right:5px;border-radius:50%;"></span>
@@ -115,7 +114,7 @@ $isTeknisiAdmin = $user->hasRole('AdminTeknisi');
                                 </div>
                             </div>
                             <div class="col-md-6 d-flex justify-content-center">
-                                <ul class="list-unstyled mt-2 w-100">
+                                <ul id="dandori-man-legend" class="list-unstyled mt-2 w-100">
                                     @foreach($dandoriManChartData['labels'] as $key => $label)
                                     <li>
                                         <span style="display:inline-block;width:10px;height:10px;background-color:{{ $dandoriManChartData['colors'][$key] }};margin-right:5px;border-radius:50%;"></span>
@@ -205,25 +204,8 @@ $isTeknisiAdmin = $user->hasRole('AdminTeknisi');
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
 <script>
     let ticketStatusChart, dandoriManChart, resolutionChart;
-    const ticketStatusChartData = {
-        labels: @json($ticketStatusChartData['labels']),
-        datasets: [{
-            data: @json($ticketStatusChartData['data']),
-            backgroundColor: @json($ticketStatusChartData['colors']),
-            hoverOffset: 4
-        }]
-    };
-    const dandoriManChartData = {
-        labels: @json($dandoriManChartData['labels']),
-        datasets: [{
-            data: @json($dandoriManChartData['data']),
-            backgroundColor: @json($dandoriManChartData['colors']),
-            hoverOffset: 4
-        }]
-    };
-    const dailyTicketCounts = @json($dailyTicketCounts);
-    const monthlyTicketCounts = @json($monthlyTicketCounts);
-    const colorPalette = ['#007bff', '#28a745', '#dc3545', '#ffc107', '#17a2b8', '#6610f2', '#6c757d', '#fd7e14', '#e83e8c', '#6f42c1', '#20c997', '#d63384'];
+    const ticketStatusChartColors = ['#ff0015ff', '#ffc400ff', '#a5a5a5ff', '#00b463ff'];
+    const dandoriManChartColors = ['#007bff', '#28a745', '#dc3545', '#ffc107', '#17a2b8', '#6610f2', '#6c757d', '#fd7e14', '#e83e8c', '#6f42c1', '#20c997', '#d63384'];
 
     const centerTextPlugin = {
         id: 'centerTextPlugin',
@@ -258,14 +240,21 @@ $isTeknisiAdmin = $user->hasRole('AdminTeknisi');
 
     Chart.register(centerTextPlugin);
 
-    function createDoughnutChart(chartId, chartData) {
+    function createDoughnutChart(chartId, chartData, chartColors) {
         const ctx = document.getElementById(chartId).getContext('2d');
         if (Chart.getChart(chartId)) {
             Chart.getChart(chartId).destroy();
         }
         return new Chart(ctx, {
             type: 'doughnut',
-            data: chartData,
+            data: {
+                labels: chartData.labels,
+                datasets: [{
+                    data: chartData.data,
+                    backgroundColor: chartColors,
+                    hoverOffset: 4
+                }]
+            },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
@@ -278,6 +267,30 @@ $isTeknisiAdmin = $user->hasRole('AdminTeknisi');
                     },
                 },
             }
+        });
+    }
+
+    // Helper function to update the chart data and legend
+    function updateChart(chart, newData, chartColors) {
+        chart.data.datasets[0].data = newData.data;
+        chart.data.labels = newData.labels;
+        chart.data.datasets[0].backgroundColor = chartColors; // Keep colors consistent
+        chart.update();
+
+        // Check if there is a corresponding legend element
+        if (chart.canvas.id === 'ticketStatusChart') {
+            updateLegend(newData.labels, newData.data, chartColors, document.getElementById('ticket-status-legend'));
+        } else if (chart.canvas.id === 'dandoriManChart') {
+            updateLegend(newData.labels, newData.data, chartColors, document.getElementById('dandori-man-legend'));
+        }
+    }
+
+    function updateLegend(labels, data, colors, container) {
+        if (!container) return;
+        container.innerHTML = '';
+        labels.forEach((label, index) => {
+            const color = colors[index % colors.length];
+            container.innerHTML += `<li><span style="display:inline-block;width:10px;height:10px;background-color:${color};margin-right:5px;border-radius:50%;"></span><strong>${label}: ${data[index]} tickets</strong></li>`;
         });
     }
 
@@ -367,16 +380,7 @@ $isTeknisiAdmin = $user->hasRole('AdminTeknisi');
                     }
                 }
             });
-            updateLegend(labels, data, resolutionColors);
-        }
-
-        function updateLegend(labels, data, colors) {
-            if (!legendContainer) return;
-            legendContainer.innerHTML = '';
-            labels.forEach((label, index) => {
-                const color = colors[index % colors.length];
-                legendContainer.innerHTML += `<li><span style="display:inline-block;width:10px;height:10px;background-color:${color};margin-right:5px;border-radius:50%;"></span><strong>${label}: ${data[index]} tickets</strong></li>`;
-            });
+            updateLegend(labels, data, resolutionColors, legendContainer);
         }
 
         function filterDailyByRange(startDate, endDate) {
@@ -475,12 +479,21 @@ $isTeknisiAdmin = $user->hasRole('AdminTeknisi');
         const isView = @json($isView);
         const isAdminOrTeknisi = @json($isAdmin || $isTeknisi || $isTeknisiAdmin);
         const isRequestor = @json($isRequestor);
+        
+        let initialTicketStatusChartData = {
+            labels: @json($ticketStatusChartData['labels']),
+            data: @json($ticketStatusChartData['data'])
+        };
+        let initialDandoriManChartData = {
+            labels: @json($dandoriManChartData['labels']),
+            data: @json($dandoriManChartData['data'])
+        };
 
         if (isView || isAdminOrTeknisi || isRequestor) {
-            createDoughnutChart('ticketStatusChart', ticketStatusChartData);
+            ticketStatusChart = createDoughnutChart('ticketStatusChart', initialTicketStatusChartData, ticketStatusChartColors);
         }
         if (isAdminOrTeknisi || isRequestor) {
-            createDoughnutChart('dandoriManChart', dandoriManChartData);
+            dandoriManChart = createDoughnutChart('dandoriManChart', initialDandoriManChartData, dandoriManChartColors);
         }
 
         if (dailyBtn) {
@@ -489,29 +502,34 @@ $isTeknisiAdmin = $user->hasRole('AdminTeknisi');
             createResolutionChart('bar', [], [], '');
         }
 
-        // Auto-refresh and new ticket alert logic for "Views" role
         if (isView) {
             let lastTableState = "";
+            let lastChartState = "";
             const tableBody = document.getElementById('dandori-table-body');
             const newTicketAudio = document.getElementById('newTicketAudio');
             const discoOverlay = document.getElementById('disco-overlay');
 
-            async function fetchAndUpdateTable() {
+            async function fetchAndUpdateData() {
                 try {
-                    const response = await fetch('{{ route('home.dandories.data') }}');
-                    const data = await response.json();
+                    const [ticketsResponse, chartsResponse] = await Promise.all([
+                        fetch('{{ route('home.dandories.data') }}'),
+                        fetch('{{ route('home.charts.data') }}')
+                    ]);
                     
-                    const filteredData = data.filter(ticket => ticket.status !== 'FINISH');
+                    const ticketsData = await ticketsResponse.json();
+                    const chartsData = await chartsResponse.json();
                     
-                    const currentTableState = JSON.stringify(filteredData.map(ticket => {
-                        return {
-                            id: ticket.ddcnk_id,
-                            status: ticket.status,
-                            assigned_to: ticket.assigned_to_name
-                        };
-                    }).sort((a,b) => a.id.localeCompare(b.id)));
+                    const filteredTicketsData = ticketsData.filter(ticket => ticket.status !== 'FINISH');
                     
-                    if (lastTableState !== "" && currentTableState !== lastTableState) {
+                    const currentTableState = JSON.stringify(filteredTicketsData.map(ticket => ({
+                        id: ticket.ddcnk_id,
+                        status: ticket.status,
+                        assigned_to: ticket.assigned_to_name
+                    })).sort((a,b) => a.id.localeCompare(b.id)));
+                    
+                    const currentChartState = JSON.stringify(chartsData);
+
+                    if (lastTableState !== "" && (currentTableState !== lastTableState || currentChartState !== lastChartState)) {
                         newTicketAudio.play();
                         discoOverlay.classList.add('active'); 
                         setTimeout(() => {
@@ -519,11 +537,11 @@ $isTeknisiAdmin = $user->hasRole('AdminTeknisi');
                         }, 15000); 
                     }
 
+                    // Update Table
                     tableBody.innerHTML = '';
-                    filteredData.forEach(ticket => {
+                    filteredTicketsData.forEach(ticket => {
                         const row = document.createElement('tr');
                         row.setAttribute('data-status', ticket.status);
-
                         row.innerHTML = `
                             <td><strong>${ticket.ddcnk_id}</strong></td>
                             <td><strong>${ticket.line_production}</strong></td>
@@ -541,15 +559,25 @@ $isTeknisiAdmin = $user->hasRole('AdminTeknisi');
                         tableBody.appendChild(row);
                     });
 
+                    // Update Charts
+                    if (ticketStatusChart) {
+                        updateChart(ticketStatusChart, chartsData.ticketStatusChartData, ticketStatusChartColors);
+                    }
+                    if (dandoriManChart) {
+                        updateChart(dandoriManChart, chartsData.dandoriManChartData, dandoriManChartColors);
+                    }
+
                     lastTableState = currentTableState;
+                    lastChartState = currentChartState;
 
                 } catch (error) {
-                    console.error('Error fetching dandori tickets:', error);
+                    console.error('Error fetching dashboard data:', error);
                 }
             }
 
-            fetchAndUpdateTable();
-            setInterval(fetchAndUpdateTable, 30000);
+            // Initial fetch on page load
+            fetchAndUpdateData();
+            setInterval(fetchAndUpdateData, 30000);
         }
     });
 </script>
