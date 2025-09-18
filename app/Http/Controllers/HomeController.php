@@ -114,6 +114,7 @@ class HomeController extends Controller
                 'planning_shift' => $dandory->planning_shift,
                 'status' => $dandory->status,
                 'assigned_to_name' => $assignedTo ? $assignedTo->name : 'N/A',
+                'updated_at' => $dandory->updated_at, // Add the updated_at timestamp
             ];
         });
 

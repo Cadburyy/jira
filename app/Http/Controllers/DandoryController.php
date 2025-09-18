@@ -41,21 +41,17 @@ class DandoryController extends Controller
                              ->groupBy('assigned_to')
                              ->pluck('count', 'assigned_to');
 
-        // Merge daily counts into the User collection for sorting
         $sortedTeknisiUsers = $teknisiUsers->map(function ($teknisiUser) use ($dailyCounts) {
             $teknisiUser->daily_count = $dailyCounts[$teknisiUser->id] ?? 0;
             return $teknisiUser;
         });
 
-        // Correctly sort the collection:
-        // First, by daily_count in descending order.
-        // Second, by name alphabetically for users with the same daily_count.
         $sortedTeknisiUsers = $sortedTeknisiUsers->sort(function ($a, $b) {
             if ($a->daily_count === $b->daily_count) {
                 return $a->name <=> $b->name;
             }
             return $b->daily_count <=> $a->daily_count;
-        })->values(); // Re-index the collection
+        })->values();
 
         if ($user->hasRole('Admin') || $user->hasRole('AdminTeknisi')) {
             $activeDandories = $query->whereIn('status', ['TO DO', 'IN PROGRESS', 'PENDING'])->get();
@@ -70,7 +66,7 @@ class DandoryController extends Controller
         }
 
         if ($user->hasRole('Teknisi')) {
-            $activeDandories = $query->whereIn('status', ['TO DO', 'IN PROGRESS', 'PENDING'])->where('assigned_to', $user->id)->get();
+            $activeDandories = $query->whereIn('status', ['TO DO', 'IN PROGRESS', 'PENDING'])->get();
             $finishedDandories = Dandory::where('status', 'FINISH')->where('assigned_to', $user->id)->get();
             return view('dandories.index', compact('activeDandories', 'finishedDandories', 'users', 'sortedTeknisiUsers', 'dailyCounts', 'dateFilter'));
         }
@@ -123,6 +119,7 @@ class DandoryController extends Controller
         if ($user->hasRole('Requestor') && $dandory->added_by !== $user->id) {
             abort(403);
         }
+
         return view('dandories.show', compact('dandory'));
     }
 
@@ -171,12 +168,14 @@ class DandoryController extends Controller
         ]);
 
         $user = Auth::user();
+        $newStatus = $request->input('status');
 
+        // Allow Admins and AdminTeknisi to update any ticket status.
+        // Allow a Teknisi to update the status of tickets assigned to them.
         if (!($user->hasRole('Admin') || $user->hasRole('AdminTeknisi')) && $dandory->assigned_to != $user->id) {
-            abort(403, 'You can only update the status of tickets assigned to you.');
+            return response()->json(['success' => false, 'error' => 'You can only update the status of tickets assigned to you.'], 403);
         }
 
-        $newStatus = $request->input('status');
         $updateData = ['status' => $newStatus];
 
         if ($newStatus == 'IN PROGRESS') {
@@ -231,17 +230,23 @@ class DandoryController extends Controller
 
     public function assign(Request $request, Dandory $dandory)
     {
-        if (!Auth::user()->hasRole('Admin') && !Auth::user()->hasRole('AdminTeknisi')) {
-            abort(403);
+        $user = Auth::user();
+        $assignedToId = $request->input('assigned_to');
+
+        // Allow Admins and AdminTeknisi to assign to anyone.
+        // A Teknisi can only assign themselves to a ticket, and only if it's currently unassigned.
+        if (($user->hasRole('Teknisi') && ($dandory->assigned_to !== null || $assignedToId != $user->id)) && 
+            !($user->hasRole('Admin') || $user->hasRole('AdminTeknisi'))) {
+            return response()->json(['success' => false, 'error' => 'You cannot assign a ticket that is already assigned to someone else or to a different user.'], 403);
         }
 
         $request->validate([
             'assigned_to' => 'nullable|exists:users,id',
         ]);
         
-        $assignedToUser = User::find($request->assigned_to);
+        $dandory->update(['assigned_to' => $assignedToId]);
 
-        $dandory->update(['assigned_to' => $request->assigned_to]);
+        $assignedToUser = User::find($assignedToId);
         
         if ($assignedToUser) {
             try {

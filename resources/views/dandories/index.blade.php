@@ -231,6 +231,7 @@
                                     </td>
                                     <td class="assigned-to-cell">
                                         @if (Auth::user()->hasRole('Admin') || Auth::user()->hasRole('AdminTeknisi'))
+                                            {{-- Admins/AdminTeknisi can assign to any technician --}}
                                             <form action="{{ route('dandories.assign', $dandory->id) }}" method="POST"
                                                 class="update-form assigned-form">
                                                 @csrf
@@ -244,9 +245,25 @@
                                                     @endforeach
                                                 </select>
                                             </form>
+                                        @elseif(Auth::user()->hasRole('Teknisi') && !$dandory->assigned_to)
+                                            {{-- Teknisi can only self-assign unassigned tickets --}}
+                                            <form action="{{ route('dandories.assign', $dandory->id) }}" method="POST"
+                                                class="update-form assigned-form">
+                                                @csrf
+                                                @method('PUT')
+                                                <select name="assigned_to" class="form-control">
+                                                    <option value="">-- Assign --</option>
+                                                    <option value="{{ Auth::id() }}"
+                                                        {{ $dandory->assigned_to == Auth::id() ? 'selected' : '' }}>
+                                                        {{ Auth::user()->name }}
+                                                    </option>
+                                                </select>
+                                            </form>
                                         @elseif($dandory->assigned_to)
+                                            {{-- Display assigned user's name if ticket is assigned --}}
                                             {{ App\Models\User::find($dandory->assigned_to)->name }}
                                         @else
+                                            {{-- Show N/A for unassigned tickets if not a technician --}}
                                             N/A
                                         @endif
                                     </td>
@@ -357,6 +374,7 @@
                                     </td>
                                     <td class="assigned-to-cell">
                                         @if (Auth::user()->hasRole('Admin') || Auth::user()->hasRole('AdminTeknisi'))
+                                            {{-- Admins/AdminTeknisi can assign to any technician --}}
                                             <form action="{{ route('dandories.assign', $dandory->id) }}" method="POST"
                                                 class="update-form assigned-form">
                                                 @csrf
@@ -370,9 +388,25 @@
                                                     @endforeach
                                                 </select>
                                             </form>
+                                        @elseif(Auth::user()->hasRole('Teknisi') && !$dandory->assigned_to)
+                                            {{-- Teknisi can only self-assign unassigned tickets --}}
+                                            <form action="{{ route('dandories.assign', $dandory->id) }}" method="POST"
+                                                class="update-form assigned-form">
+                                                @csrf
+                                                @method('PUT')
+                                                <select name="assigned_to" class="form-control">
+                                                    <option value="">-- Assign --</option>
+                                                    <option value="{{ Auth::id() }}"
+                                                        {{ $dandory->assigned_to == Auth::id() ? 'selected' : '' }}>
+                                                        {{ Auth::user()->name }}
+                                                    </option>
+                                                </select>
+                                            </form>
                                         @elseif($dandory->assigned_to)
+                                            {{-- Display assigned user's name if ticket is assigned --}}
                                             {{ App\Models\User::find($dandory->assigned_to)->name }}
                                         @else
+                                            {{-- Show N/A for unassigned tickets if not a technician --}}
                                             N/A
                                         @endif
                                     </td>
@@ -495,6 +529,14 @@
                             <div class="mb-3">
                                 <label for="finished-to-date" class="form-label">To Date</label>
                                 <input type="date" name="to_date" id="finished-to-date" class="form-control">
+                            </div>
+                            <div class="d-flex justify-content-end mt-4">
+                                <button type="button" class="btn btn-info me-2" id="downloadAllFinishedBtn">
+                                    <i class="fa-solid fa-download me-1"></i> Download All Finished
+                                </button>
+                                <button type="submit" class="btn btn-primary" name="format" value="csv">
+                                    <i class="fa-solid fa-download me-1"></i> Download Selected
+                                </button>
                             </div>
                         </div>
                     </form>
@@ -674,6 +716,7 @@
             const wipDateFilter = document.getElementById('wip-date-filter');
             const statusCheckboxes = document.querySelectorAll('input[name="statuses[]"]');
             const downloadAllWipBtn = document.getElementById('downloadAllWipBtn');
+            const downloadAllFinishedBtn = document.getElementById('downloadAllFinishedBtn');
 
             downloadModal.addEventListener('show.bs.modal', function(event) {
                 const button = event.relatedTarget;
@@ -697,6 +740,12 @@
                     '&statuses[]=' + encodeURIComponent('PENDING') +
                     '&format=csv';
 
+                window.location.href = url;
+            });
+            
+            downloadAllFinishedBtn.addEventListener('click', function() {
+                const url = '{{ route('dandories.download', ['type' => 'finished']) }}' +
+                    '?select_all=1&format=csv';
                 window.location.href = url;
             });
         });

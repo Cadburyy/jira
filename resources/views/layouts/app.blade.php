@@ -18,11 +18,6 @@
 
     $fontHrefName = str_replace(' ', '+', $font);
 
-    // Get color settings or use defaults
-    $bgColor = $settings['bg_color'] ?? '#f8f9fa';
-    $navBgColor = $settings['nav_bg_color'] ?? '#ffffff';
-
-    // Helper function to determine if a color is "light" or "dark"
     function getTextColor($hexColor) {
         $hex = str_replace('#', '', $hexColor);
         if (strlen($hex) == 3) {
@@ -38,7 +33,6 @@
         return $luminance > 0.5 ? '#111827' : '#f8f9fa'; 
     }
     
-    // Helper function to convert hex to rgba
     function hexToRgba($hex, $alpha) {
         $hex = str_replace('#', '', $hex);
         if (strlen($hex) == 3) {
@@ -53,7 +47,6 @@
         return "rgba($r, $g, $b, $alpha)";
     }
 
-    // Helper to determine card background color based on main background
     function getCardBgColor($bgColor) {
         $hex = str_replace('#', '', $bgColor);
         if (strlen($hex) == 3) {
@@ -69,7 +62,6 @@
         return $luminance > 0.5 ? '#f3f4f6' : '#ffffff'; 
     }
 
-    // New helper to determine dropdown background color based on main background
     function getDropdownBgColor($bgColor) {
         $hex = str_replace('#', '', $bgColor);
         if (strlen($hex) == 3) {
@@ -82,10 +74,11 @@
             $b = hexdec(substr($hex, 4, 2));
         }
         $luminance = (0.299 * $r + 0.587 * $g + 0.114 * $b) / 255;
-        // Make dropdown darker on bright background, and lighter on dark background
         return $luminance > 0.5 ? '#e9ecef' : '#212529';
     }
 
+    $bgColor = $settings['bg_color'] ?? '#f8f9fa';
+    $navBgColor = $settings['nav_bg_color'] ?? '#ffffff';
     $bgTextColor = getTextColor($bgColor);
     $navTextColor = getTextColor($navBgColor);
     $cardBgColor = getCardBgColor($bgColor);
@@ -125,13 +118,20 @@
             background-color: var(--bg);
             color: var(--text);
             font-family: '{{ $font }}', system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
+            position: relative; 
+            z-index: 1; 
         }
         
+        #app {
+            position: relative; 
+            z-index: 2; 
+        }
+
         .navbar-brand,
         .navbar-brand span,
         .navbar .nav-link,
         .dropdown-item {
-             color: var(--nav-text) !important;
+            color: var(--nav-text) !important;
         }
 
         .navbar.navbar-light.bg-white,
@@ -141,8 +141,8 @@
         }
 
         .dropdown-menu {
-             background-color: var(--dropdown-surface) !important;
-             color: var(--dropdown-text) !important;
+            background-color: var(--dropdown-surface) !important;
+            color: var(--dropdown-text) !important;
         }
 
         .dropdown-item {
@@ -230,9 +230,36 @@
             from { opacity: 0; transform: translateY(-20px); }
             to { opacity: 1; transform: translateY(0); }
         }
+        
+        @keyframes disco-lights {
+            0% { background-color: rgba(255, 0, 0, 0.3); }    /* Red */
+            14% { background-color: rgba(255, 165, 0, 0.3); } /* Orange */
+            28% { background-color: rgba(255, 255, 0, 0.3); } /* Yellow */
+            42% { background-color: rgba(0, 128, 0, 0.3); }   /* Green */
+            56% { background-color: rgba(0, 0, 255, 0.3); }   /* Blue */
+            70% { background-color: rgba(75, 0, 130, 0.3); }  /* Indigo */
+            84% { background-color: rgba(238, 130, 238, 0.3); } /* Violet */
+            100% { background-color: rgba(255, 0, 0, 0.3); }  /* Red */
+        }
+        .disco-background-overlay {
+            animation: disco-lights 6s infinite linear; 
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 0; 
+            pointer-events: none; 
+            opacity: 0; 
+            transition: opacity 1s ease-in-out;
+        }
+        .disco-background-overlay.active {
+            opacity: 1;
+        }
     </style>
 </head>
 <body>
+    <div id="disco-overlay" class="disco-background-overlay"></div> 
     <div id="app">
         <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm fixed-blur-navbar">
             <div class="container">

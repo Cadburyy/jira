@@ -33,7 +33,7 @@
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="customer" class="form-label"><strong>Customer:</strong></label>
-                        <input type="text" name="customer" class="form-control" placeholder="Customer" value="{{ old('customer') }}" required autocomplete="off">
+                        <input type="text" name="customer" class="form-control" placeholder="Customer" value="{{ old('customer') }}" required>
                     </div>
                 </div>
                 <div class="col-md-6">
