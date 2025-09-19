@@ -20,7 +20,7 @@ Auth::routes();
 
 Route::get('/home', [HomeController::class, 'index'])->name('home');
 Route::get('/home/dandories/data', [HomeController::class, 'getDandoriTicketsData'])->name('home.dandories.data');
-Route::get('/home/charts-data', [HomeController::class, 'getChartData'])->name('home.charts.data');
+Route::get('/chart-data', [App\Http\Controllers\HomeController::class, 'getChartData'])->name('chart.data');
 
 Route::middleware(['auth'])->group(function () {
     Route::resource('roles', RoleController::class);

@@ -50,8 +50,7 @@ $isTeknisiAdmin = $user->hasRole('AdminTeknisi');
 
 <div class="container py-3">
     <h2 class="text-center mb-2 text-dark"><strong>Welcome, {{ $user->name }} 👋</strong></h2>
-
-    <div class="row row-cols-1 row-cols-md-3 g-3 justify-content-center mt-3">        
+    <div class="row row-cols-1 row-cols-md-3 g-3 justify-content-center mt-3">
         @if($isAdmin || $isRequestor || $isTeknisi || $isTeknisiAdmin)
         <div class="col-md-4">
             <a href="{{ route('dandories.index') }}" class="text-decoration-none card-link-hover">
@@ -71,8 +70,7 @@ $isTeknisiAdmin = $user->hasRole('AdminTeknisi');
             <strong>{{ session('status') }}</strong>
         </div>
     @endif
-    <h3 class="text-center mt-4 text-dark"><strong>Dashboard</strong></h3>
-    <div class="row mt-4">
+    <div class="row">
         <div class="row g-3 justify-content-center">
             <div class="col-lg-6 col-md-6 mb-3">
                 <div class="card h-100 p-3 shadow-sm">
@@ -475,9 +473,30 @@ $isTeknisiAdmin = $user->hasRole('AdminTeknisi');
         const isAdminOrTeknisi = @json($isAdmin || $isTeknisi || $isTeknisiAdmin);
         const isRequestor = @json($isRequestor);
 
+        let ticketStatusChartInstance = null;
         if (isView || isAdminOrTeknisi || isRequestor) {
-            createDoughnutChart('ticketStatusChart', ticketStatusChartData);
+            ticketStatusChartInstance = createDoughnutChart('ticketStatusChart', ticketStatusChartData);
+
+            function updateTicketStatusChart() {
+                fetch('{{ route('chart.data') }}')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (ticketStatusChartInstance) {
+                            ticketStatusChartInstance.data.datasets[0].data = data.ticketStatusChartData.data;
+                            ticketStatusChartInstance.update();
+
+                            const legendItems = document.querySelectorAll('.card-body ul.list-unstyled li');
+                            data.ticketStatusChartData.data.forEach((val, idx) => {
+                                if (legendItems[idx]) {
+                                    legendItems[idx].querySelector('strong').innerHTML = `${data.ticketStatusChartData.labels[idx]}: ${val}`;
+                                }
+                            });
+                        }
+                    });
+            }
+            setInterval(updateTicketStatusChart, 30000);
         }
+
         if (isAdminOrTeknisi || isRequestor) {
             createDoughnutChart('dandoriManChart', dandoriManChartData);
         }
@@ -488,7 +507,6 @@ $isTeknisiAdmin = $user->hasRole('AdminTeknisi');
             createResolutionChart('bar', [], [], '');
         }
 
-        // Auto-refresh and new ticket alert logic for "Views" role
         if (isView) {
             let lastTableState = "";
             const tableBody = document.getElementById('dandori-table-body');
