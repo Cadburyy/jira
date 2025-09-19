@@ -533,7 +533,7 @@ $isTeknisiAdmin = $user->hasRole('AdminTeknisi');
                         discoOverlay.classList.add('active'); 
                         setTimeout(() => {
                             discoOverlay.classList.remove('active');
-                        }, 15000); 
+                        }, 10000); 
                     }
 
                     tableBody.innerHTML = '';

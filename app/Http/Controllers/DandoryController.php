@@ -308,7 +308,7 @@ class DandoryController extends Controller
             fputcsv($file, [
                 'ID', 'Key', 'Line Production', 'Requestor', 'Customer', 'Part Name', 'Part No', 
                 'Process', 'Machine', 'Qty', 'Planning Shift', 'Status', 'Check In', 'Check Out', 
-                'Total Time Needed (minutes)', 'Notes', 'Assigned To', 'Created At', 'Updated At'
+                'Total Time Needed (seconds)', 'Notes', 'Assigned To', 'Created At', 'Updated At'
             ]);
 
             foreach ($tickets as $ticket) {
@@ -316,7 +316,7 @@ class DandoryController extends Controller
                 if ($ticket->check_in && $ticket->check_out) {
                     $checkIn = Carbon::parse($ticket->check_in);
                     $checkOut = Carbon::parse($ticket->check_out);
-                    $totalTime = $checkOut->diffInMinutes($checkIn);
+                    $totalTime = $checkIn->diffInSeconds($checkOut);
                 }
 
                 fputcsv($file, [
