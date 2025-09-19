@@ -7,6 +7,7 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\DandoryController;
 use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\CustomerController; // Import the new controller
 
 Route::get('/', function () {
     if (Auth::check()) {
@@ -25,6 +26,7 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('roles', RoleController::class);
     Route::resource('users', UserController::class);
     Route::resource('dandories', DandoryController::class);
+    Route::resource('customers', CustomerController::class);
 
     Route::put('dandories/{dandory}/status', [DandoryController::class, 'updateStatus'])->name('dandories.updateStatus');
     Route::put('dandories/{dandory}/planning', [DandoryController::class, 'updatePlanning'])->name('dandories.updatePlanning');

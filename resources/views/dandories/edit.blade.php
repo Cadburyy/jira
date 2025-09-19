@@ -35,7 +35,16 @@
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="customer" class="form-label"><strong>Customer:</strong></label>
-                        <input type="text" name="customer" class="form-control" placeholder="Customer" value="{{ old('customer', $dandory->customer) }}" required autocomplete="off">
+                        <input list="customers" name="customer" id="customer-input" 
+                            class="form-control"
+                            value="{{ old('customer', $dandory->customer) }}" 
+                            required autocomplete="off">
+
+                        <datalist id="customers">
+                            @foreach ($customers as $customer)
+                                <option value="{{ $customer->name }}">
+                            @endforeach
+                        </datalist>
                     </div>
                 </div>
                 <div class="col-md-6">

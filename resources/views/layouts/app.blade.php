@@ -6,12 +6,12 @@
         return Setting::pluck('value', 'key')->toArray();
     });
 
-    $brand = $settings['brand_name'] ?? 'Citra Nugerah Karya';
-    $font  = $settings['font'] ?? 'Nunito';
-    $logoUrl = !empty($settings['logo_path'])
+    $brand    = $settings['brand_name'] ?? 'Citra Nugerah Karya';
+    $font     = $settings['font'] ?? 'Nunito';
+    $logoUrl  = !empty($settings['logo_path'])
         ? asset('storage/'.$settings['logo_path'])
         : asset('images/cnk.png');
-    
+
     $faviconUrl = !empty($settings['favicon_path'])
         ? asset('storage/'.$settings['favicon_path'])
         : asset('favicon.ico');
@@ -21,24 +21,24 @@
     function getTextColor($hexColor) {
         $hex = str_replace('#', '', $hexColor);
         if (strlen($hex) == 3) {
-            $r = hexdec(substr($hex, 0, 1) . substr($hex, 0, 1));
-            $g = hexdec(substr($hex, 1, 1) . substr($hex, 1, 1));
-            $b = hexdec(substr($hex, 2, 1) . substr($hex, 2, 1));
+            $r = hexdec(substr($hex, 0, 1).substr($hex, 0, 1));
+            $g = hexdec(substr($hex, 1, 1).substr($hex, 1, 1));
+            $b = hexdec(substr($hex, 2, 1).substr($hex, 2, 1));
         } else {
             $r = hexdec(substr($hex, 0, 2));
             $g = hexdec(substr($hex, 2, 2));
             $b = hexdec(substr($hex, 4, 2));
         }
         $luminance = (0.299 * $r + 0.587 * $g + 0.114 * $b) / 255;
-        return $luminance > 0.5 ? '#111827' : '#f8f9fa'; 
+        return $luminance > 0.5 ? '#111827' : '#f8f9fa';
     }
-    
+
     function hexToRgba($hex, $alpha) {
         $hex = str_replace('#', '', $hex);
         if (strlen($hex) == 3) {
-            $r = hexdec(substr($hex, 0, 1) . substr($hex, 0, 1));
-            $g = hexdec(substr($hex, 1, 1) . substr($hex, 1, 1));
-            $b = hexdec(substr($hex, 2, 1) . substr($hex, 2, 1));
+            $r = hexdec(substr($hex, 0, 1).substr($hex, 0, 1));
+            $g = hexdec(substr($hex, 1, 1).substr($hex, 1, 1));
+            $b = hexdec(substr($hex, 2, 1).substr($hex, 2, 1));
         } else {
             $r = hexdec(substr($hex, 0, 2));
             $g = hexdec(substr($hex, 2, 2));
@@ -50,24 +50,24 @@
     function getCardBgColor($bgColor) {
         $hex = str_replace('#', '', $bgColor);
         if (strlen($hex) == 3) {
-            $r = hexdec(substr($hex, 0, 1) . substr($hex, 0, 1));
-            $g = hexdec(substr($hex, 1, 1) . substr($hex, 1, 1));
-            $b = hexdec(substr($hex, 2, 1) . substr($hex, 2, 1));
+            $r = hexdec(substr($hex, 0, 1).substr($hex, 0, 1));
+            $g = hexdec(substr($hex, 1, 1).substr($hex, 1, 1));
+            $b = hexdec(substr($hex, 2, 1).substr($hex, 2, 1));
         } else {
             $r = hexdec(substr($hex, 0, 2));
             $g = hexdec(substr($hex, 2, 2));
             $b = hexdec(substr($hex, 4, 2));
         }
         $luminance = (0.299 * $r + 0.587 * $g + 0.114 * $b) / 255;
-        return $luminance > 0.5 ? '#f3f4f6' : '#ffffff'; 
+        return $luminance > 0.5 ? '#f3f4f6' : '#ffffff';
     }
 
     function getDropdownBgColor($bgColor) {
         $hex = str_replace('#', '', $bgColor);
         if (strlen($hex) == 3) {
-            $r = hexdec(substr($hex, 0, 1) . substr($hex, 0, 1));
-            $g = hexdec(substr($hex, 1, 1) . substr($hex, 1, 1));
-            $b = hexdec(substr($hex, 2, 1) . substr($hex, 2, 1));
+            $r = hexdec(substr($hex, 0, 1).substr($hex, 0, 1));
+            $g = hexdec(substr($hex, 1, 1).substr($hex, 1, 1));
+            $b = hexdec(substr($hex, 2, 1).substr($hex, 2, 1));
         } else {
             $r = hexdec(substr($hex, 0, 2));
             $g = hexdec(substr($hex, 2, 2));
@@ -77,22 +77,23 @@
         return $luminance > 0.5 ? '#e9ecef' : '#212529';
     }
 
-    $bgColor = $settings['bg_color'] ?? '#f8f9fa';
-    $navBgColor = $settings['nav_bg_color'] ?? '#ffffff';
-    $bgTextColor = getTextColor($bgColor);
-    $navTextColor = getTextColor($navBgColor);
-    $cardBgColor = getCardBgColor($bgColor);
-    $cardTextColor = getTextColor($cardBgColor);
-    $dropdownBgColor = getDropdownBgColor($bgColor);
+    $bgColor          = $settings['bg_color'] ?? '#f8f9fa';
+    $navBgColor       = $settings['nav_bg_color'] ?? '#ffffff';
+    $bgTextColor      = getTextColor($bgColor);
+    $navTextColor     = getTextColor($navBgColor);
+    $cardBgColor      = getCardBgColor($bgColor);
+    $cardTextColor    = getTextColor($cardBgColor);
+    $dropdownBgColor  = getDropdownBgColor($bgColor);
     $dropdownTextColor = getTextColor($dropdownBgColor);
 @endphp
+
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $brand }}</title>
-    
+
     <link rel="icon" type="image/x-icon" href="{{ $faviconUrl }}">
     <link rel="dns-prefetch" href="//fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family={{ $fontHrefName }}:400,600,700" rel="stylesheet">
@@ -118,13 +119,6 @@
             background-color: var(--bg);
             color: var(--text);
             font-family: '{{ $font }}', system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
-            position: relative; 
-            z-index: 1; 
-        }
-        
-        #app {
-            position: relative; 
-            z-index: 2; 
         }
 
         .navbar-brand,
@@ -158,7 +152,7 @@
             background-color: var(--card-surface) !important;
             border-bottom: 1px solid var(--border) !important;
         }
-        
+
         .fixed-blur-navbar {
             position: fixed;
             top: 0;
@@ -167,6 +161,7 @@
             backdrop-filter: blur(5px);
             background-color: {{ hexToRgba($navBgColor, 0.8) }};
         }
+
         #loading-bar {
             position: absolute;
             bottom: 0;
@@ -177,10 +172,12 @@
             transition: width 0.3s ease-in-out, opacity 0.5s ease-in-out;
             z-index: 1031;
         }
+
         .navbar-nav .nav-link {
             position: relative;
             padding-bottom: 12px;
         }
+
         .navbar-nav .nav-link::before,
         .navbar-nav .nav-link::after {
             content: '';
@@ -191,13 +188,16 @@
             width: 0;
             transition: width 0.3s ease-in-out;
         }
+
         .navbar-nav .nav-link::before {
             background-color: #ef4444;
             bottom: 7px;
         }
+
         .navbar-nav .nav-link::after {
             background-color: #3b82f6;
         }
+
         .navbar-nav .nav-link:hover::before { width: 62.5%; }
         .navbar-nav .nav-link:hover::after { width: 37.5%; }
 
@@ -221,45 +221,49 @@
                 border-radius: 0.5rem;
                 transform: translateX(5px);
             }
-            .dropdown-menu { 
-                background-color: var(--dropdown-surface) !important; 
-                border: none !important; 
+            .dropdown-menu {
+                background-color: var(--dropdown-surface) !important;
+                border: none !important;
             }
         }
+
         @keyframes slideDown {
             from { opacity: 0; transform: translateY(-20px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        
+
         @keyframes disco-lights {
-            0% { background-color: rgba(255, 0, 0, 0.3); }    /* Red */
-            14% { background-color: rgba(255, 165, 0, 0.3); } /* Orange */
-            28% { background-color: rgba(255, 255, 0, 0.3); } /* Yellow */
-            42% { background-color: rgba(0, 128, 0, 0.3); }   /* Green */
-            56% { background-color: rgba(0, 0, 255, 0.3); }   /* Blue */
-            70% { background-color: rgba(75, 0, 130, 0.3); }  /* Indigo */
-            84% { background-color: rgba(238, 130, 238, 0.3); } /* Violet */
-            100% { background-color: rgba(255, 0, 0, 0.3); }  /* Red */
+            0%   { background-color: rgba(255, 0, 0, 0.3); }
+            14%  { background-color: rgba(255, 165, 0, 0.3); }
+            28%  { background-color: rgba(255, 255, 0, 0.3); }
+            42%  { background-color: rgba(0, 128, 0, 0.3); }
+            56%  { background-color: rgba(0, 0, 255, 0.3); }
+            70%  { background-color: rgba(75, 0, 130, 0.3); }
+            84%  { background-color: rgba(238, 130, 238, 0.3); }
+            100% { background-color: rgba(255, 0, 0, 0.3); }
         }
+
         .disco-background-overlay {
-            animation: disco-lights 6s infinite linear; 
+            animation: disco-lights 6s infinite linear;
             position: fixed;
             top: 0;
             left: 0;
             width: 100vw;
             height: 100vh;
-            z-index: 0; 
-            pointer-events: none; 
-            opacity: 0; 
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0;
             transition: opacity 1s ease-in-out;
         }
+
         .disco-background-overlay.active {
             opacity: 1;
         }
     </style>
 </head>
+
 <body>
-    <div id="disco-overlay" class="disco-background-overlay"></div> 
+    <div id="disco-overlay" class="disco-background-overlay"></div>
     <div id="app">
         <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm fixed-blur-navbar">
             <div class="container">
@@ -268,10 +272,10 @@
                 </a>
                 <span class="ms-2 align-items-center">{{ $brand }}</span>
 
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" 
-                    data-bs-target="#navbarSupportedContent" 
-                    aria-controls="navbarSupportedContent" aria-expanded="false" 
-                    aria-label="{{ __('Toggle navigation') }}">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#navbarSupportedContent"
+                        aria-controls="navbarSupportedContent" aria-expanded="false"
+                        aria-label="{{ __('Toggle navigation') }}">
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
@@ -293,15 +297,18 @@
                                 $isView = $user->hasRole('Views');
                                 $isTeknisiAdmin = $user->hasRole('AdminTeknisi');
                             @endphp
+
                             @if($isView || $isAdmin || $isRequestor || $isTeknisi || $isTeknisiAdmin)
                                 <li><a class="nav-link" href="{{ route('home') }}">Home</a></li>
                             @endif
+
                             @if($isAdmin || $isRequestor || $isTeknisi || $isTeknisiAdmin)
                                 <li><a class="nav-link" href="{{ route('dandories.index') }}">Dandory Tickets</a></li>
                             @endif
+
                             <li class="nav-item dropdown">
-                                <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" 
-                                    data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
+                                <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button"
+                                   data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
                                     {{ $user->name }}
                                 </a>
                                 <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
@@ -340,14 +347,14 @@
     </div>
 
     <script>
-    const loadingBar = document.getElementById('loading-bar');
-    document.addEventListener('DOMContentLoaded', function() {
-        loadingBar.style.width = '90%';
-    });
-    window.addEventListener('load', function() {
-        loadingBar.style.width = '100%';
-        loadingBar.style.opacity = '0';
-    });
+        const loadingBar = document.getElementById('loading-bar');
+        document.addEventListener('DOMContentLoaded', function () {
+            loadingBar.style.width = '90%';
+        });
+        window.addEventListener('load', function () {
+            loadingBar.style.width = '100%';
+            loadingBar.style.opacity = '0';
+        });
     </script>
 </body>
 </html>

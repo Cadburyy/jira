@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Dandory;
 use App\Models\User;
+use App\Models\Customer; // Import the Customer model
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Mail\TicketAssignedMail;
@@ -83,7 +84,8 @@ class DandoryController extends Controller
 
     public function create()
     {
-        return view('dandories.create');
+        $customers = Customer::orderBy('name')->get();
+        return view('dandories.create', compact('customers'));
     }
 
     public function store(Request $request)
@@ -131,8 +133,9 @@ class DandoryController extends Controller
 
         $allUsers = User::all();
         $teknisiUsers = $allUsers->filter(fn($u) => $u->hasRole('Teknisi'));
+        $customers = Customer::orderBy('name')->get();
         
-        return view('dandories.edit', compact('dandory', 'teknisiUsers'));
+        return view('dandories.edit', compact('dandory', 'teknisiUsers', 'customers'));
     }
 
     public function update(Request $request, Dandory $dandory)
