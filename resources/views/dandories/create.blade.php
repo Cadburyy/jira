@@ -46,31 +46,31 @@
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="line_production" class="form-label"><strong>Line Produksi:</strong></label>
-                        <input type="text" name="line_production" class="form-control" placeholder="Line Produksi" value="{{ old('line_production') }}" required autocomplete="off">
+                        <input type="text" name="line_production" class="form-control" placeholder="Line Produksi" value="{{ old('line_production') }}" required autocomplete="off" oninput="this.value = this.value.toUpperCase()">
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="nama_part" class="form-label"><strong>Nama Part:</strong></label>
-                        <input type="text" name="nama_part" class="form-control" placeholder="Nama Part" value="{{ old('nama_part') }}" required autocomplete="off">
+                        <input type="text" name="nama_part" class="form-control" placeholder="Nama Part" value="{{ old('nama_part') }}" required autocomplete="off" oninput="this.value = this.value.toUpperCase()">
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="nomor_part" class="form-label"><strong>Nomor Part:</strong></label>
-                        <input type="text" name="nomor_part" class="form-control" placeholder="Nomor Part" value="{{ old('nomor_part') }}" required autocomplete="off">
+                        <input type="text" name="nomor_part" class="form-control" placeholder="Nomor Part" value="{{ old('nomor_part') }}" required autocomplete="off" oninput="this.value = this.value.toUpperCase()">
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="proses" class="form-label"><strong>Proses:</strong></label>
-                        <input type="text" name="proses" class="form-control" placeholder="Proses" value="{{ old('proses') }}" required autocomplete="off">
+                        <input type="text" name="proses" class="form-control" placeholder="Proses" value="{{ old('proses') }}" required autocomplete="off" oninput="this.value = this.value.toUpperCase()">
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="mesin" class="form-label"><strong>Mesin:</strong></label>
-                        <input type="text" name="mesin" class="form-control" placeholder="Mesin" value="{{ old('mesin') }}" required autocomplete="off">
+                        <input type="text" name="mesin" class="form-control" placeholder="Mesin" value="{{ old('mesin') }}" required autocomplete="off" oninput="this.value = this.value.toUpperCase()">
                     </div>
                 </div>
                 <div class="col-md-6">
