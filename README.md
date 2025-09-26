@@ -108,7 +108,7 @@ Your application should now be accessible at:
 ### **Admin**
 
 * Full administrator access
-* Manage users, roles, and tickets
+* Manage users, roles, customer and tickets
 * Change global theme
 * Download ticket data
 
@@ -117,6 +117,7 @@ Your application should now be accessible at:
 ### **AdminTeknisi**
 
 * Able to download ticket reports
+* Manage users, customer and tickets
 * Assists other roles:
 
   * **Requestor** → Edit tickets if there are mistakes
