@@ -36,7 +36,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('dandories/download/{type}', [DandoryController::class, 'download'])->name('dandories.download');
 });
 
-Route::middleware(['auth', 'role:Admin'])->group(function () {
+Route::middleware(['auth', 'role:Admin|AdminTeknisi'])->group(function () {
     Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
 
     Route::get('/settings/appearance', [SettingsController::class, 'editAppearance'])->name('settings.appearance');

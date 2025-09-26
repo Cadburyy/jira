@@ -312,7 +312,7 @@
                                     {{ $user->name }}
                                 </a>
                                 <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                                    @if($isAdmin)
+                                    @if($isAdmin || $isTeknisiAdmin)
                                         <a class="dropdown-item" href="{{ route('settings.index') }}">Settings</a>
                                     @endif
                                     <a class="dropdown-item" href="{{ route('logout') }}"
