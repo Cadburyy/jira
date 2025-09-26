@@ -23,7 +23,6 @@ Route::get('/home/dandories/data', [HomeController::class, 'getDandoriTicketsDat
 Route::get('/chart-data', [App\Http\Controllers\HomeController::class, 'getChartData'])->name('chart.data');
 
 Route::middleware(['auth'])->group(function () {
-    Route::resource('roles', RoleController::class);
     Route::resource('users', UserController::class);
     Route::resource('dandories', DandoryController::class);
     Route::resource('customers', CustomerController::class);
@@ -34,6 +33,10 @@ Route::middleware(['auth'])->group(function () {
     Route::put('dandories/{dandory}/update-notes', [DandoryController::class, 'updateNotes'])->name('dandories.updateNotes');
 
     Route::get('dandories/download/{type}', [DandoryController::class, 'download'])->name('dandories.download');
+});
+
+Route::middleware(['auth', 'role:Admin'])->group(function () {
+    Route::resource('roles', RoleController::class);
 });
 
 Route::middleware(['auth', 'role:Admin|AdminTeknisi'])->group(function () {
