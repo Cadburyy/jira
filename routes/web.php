@@ -37,11 +37,12 @@ Route::middleware(['auth'])->group(function () {
 
 Route::middleware(['auth', 'role:Admin'])->group(function () {
     Route::resource('roles', RoleController::class);
+    
+    Route::get('/settings/appearance', [SettingsController::class, 'editAppearance'])->name('settings.appearance');
+    Route::put('/settings/appearance', [SettingsController::class, 'updateAppearance'])->name('settings.appearance.update');
 });
 
 Route::middleware(['auth', 'role:Admin|AdminTeknisi'])->group(function () {
     Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
 
-    Route::get('/settings/appearance', [SettingsController::class, 'editAppearance'])->name('settings.appearance');
-    Route::put('/settings/appearance', [SettingsController::class, 'updateAppearance'])->name('settings.appearance.update');
 });
