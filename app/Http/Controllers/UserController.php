@@ -72,8 +72,23 @@ class UserController extends Controller
     public function edit($id): View
     {
         $user = User::find($id);
+        if (!$user) abort(404, 'User not found.');
+
+        $authUser = auth()->user();
+        $authRole = $authUser->getRoleNames()->first();
+        $targetRole = $user->getRoleNames()->first();
+
+        if ($authRole === 'AdminTeknisi' && $targetRole === 'Admin') {
+            abort(403, 'You are not allowed to edit Admin users.');
+        }
+
+        if (!in_array($authRole, ['Admin', 'AdminTeknisi'])) {
+            abort(403, 'You are not authorized to edit users.');
+        }
+
         $roles = Role::pluck('name', 'name')->all();
         $userRole = $user->roles->pluck('name', 'name')->all();
+
         return view('users.edit', compact('user', 'roles', 'userRole'));
     }
 
