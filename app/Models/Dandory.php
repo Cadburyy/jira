@@ -23,6 +23,7 @@ class Dandory extends Model
         'status',
         'check_in',
         'check_out',
+        'total_work_time_seconds',
         'notes',
         'assigned_to',
         'added_by',

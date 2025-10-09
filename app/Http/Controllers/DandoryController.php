@@ -164,34 +164,59 @@ class DandoryController extends Controller
         return redirect()->route('dandories.show', $dandory)->with('success', 'Dandory ticket updated successfully!');
     }
 
-    public function updateStatus(Request $request, Dandory $dandory)
-    {
-        $request->validate([
-            'status' => 'required|in:TO DO,IN PROGRESS,FINISH,PENDING',
-        ]);
+public function updateStatus(Request $request, Dandory $dandory)
+{
+    $request->validate([
+        'status' => 'required|in:TO DO,IN PROGRESS,FINISH,PENDING',
+    ]);
 
-        $user = Auth::user();
-        $newStatus = $request->input('status');
+    $user = Auth::user();
+    $newStatus = $request->input('status');
+    $oldStatus = $dandory->status;
 
-        if (!($user->hasRole('Admin') || $user->hasRole('AdminTeknisi')) && $dandory->assigned_to != $user->id) {
-            return response()->json(['success' => false, 'error' => 'You can only update the status of tickets assigned to you.'], 403);
-        }
+    if (!($user->hasRole('Admin') || $user->hasRole('AdminTeknisi')) && $dandory->assigned_to != $user->id) {
+        return response()->json(['success' => false, 'error' => 'You can only update the status of tickets assigned to you.'], 403);
+    }
 
-        $updateData = ['status' => $newStatus];
+    $updateData = ['status' => $newStatus];
 
-        if ($newStatus == 'IN PROGRESS') {
+    if ($newStatus == 'IN PROGRESS') {
+        if ($oldStatus != 'PENDING') {
+            // New timer started from TO DO
             $updateData['check_in'] = Carbon::now();
-        } elseif ($newStatus == 'FINISH') {
-            $updateData['check_out'] = Carbon::now();
-        } elseif ($newStatus == 'TO DO') {
+            $updateData['check_out'] = null;
+            $updateData['total_work_time_seconds'] = 0; // Reset total time for a new session
+        } else {
+            // Resuming from PENDING, don't reset total_work_time
+            $updateData['check_in'] = Carbon::now();
+            $updateData['check_out'] = null;
+        }
+    } elseif ($newStatus == 'PENDING') {
+        if ($oldStatus == 'IN PROGRESS' && $dandory->check_in) {
+            // Pause the timer and add elapsed time to total
+            $elapsedTime = Carbon::parse($dandory->check_in)->diffInSeconds(Carbon::now());
+            $updateData['total_work_time_seconds'] = ($dandory->total_work_time_seconds ?? 0) + $elapsedTime;
             $updateData['check_in'] = null;
             $updateData['check_out'] = null;
         }
-
-        $dandory->update($updateData);
-
-        return response()->json(['success' => true, 'message' => 'Status updated successfully.']);
+    } elseif ($newStatus == 'FINISH') {
+        if ($oldStatus == 'IN PROGRESS' && $dandory->check_in) {
+            // Finalize the timer and add last duration to total
+            $elapsedTime = Carbon::parse($dandory->check_in)->diffInSeconds(Carbon::now());
+            $updateData['total_work_time_seconds'] = ($dandory->total_work_time_seconds ?? 0) + $elapsedTime;
+        }
+        $updateData['check_out'] = Carbon::now();
+    } elseif ($newStatus == 'TO DO') {
+        // Reset the ticket entirely
+        $updateData['check_in'] = null;
+        $updateData['check_out'] = null;
+        $updateData['total_work_time_seconds'] = 0;
     }
+
+    $dandory->update($updateData);
+
+    return response()->json(['success' => true, 'message' => 'Status updated successfully.']);
+}
 
     public function updatePlanning(Request $request, Dandory $dandory)
     {
@@ -301,49 +326,51 @@ class DandoryController extends Controller
             'Content-Disposition' => 'attachment; filename="dandory_tickets_' . $type . '_' . date('Y-m-d') . '.csv"',
         ];
 
-        $callback = function() use ($tickets) {
-            $file = fopen('php://output', 'w');
-            fputs($file, $bom = (chr(0xEF) . chr(0xBB) . chr(0xBF)));
+    $callback = function() use ($tickets) {
+        $file = fopen('php://output', 'w');
+        fputs($file, $bom = (chr(0xEF) . chr(0xBB) . chr(0xBF)));
+
+        fputcsv($file, [
+            'ID', 'Key', 'Line Production', 'Requestor', 'Customer', 'Part Name', 'Part No', 
+            'Process', 'Machine', 'Qty', 'Planning Shift', 'Status', 'Check In', 'Check Out', 
+            'Total Time Needed (seconds)', 'Notes', 'Assigned To', 'Created At', 'Updated At'
+        ]);
+
+        foreach ($tickets as $ticket) {
+            // Use the new total_work_time_seconds field
+            $totalTime = $ticket->total_work_time_seconds;
+
+            // If the status is currently IN PROGRESS, add the active session duration
+            if ($ticket->status == 'IN PROGRESS' && $ticket->check_in) {
+                $elapsedTime = Carbon::parse($ticket->check_in)->diffInSeconds(Carbon::now());
+                $totalTime += $elapsedTime;
+            }
 
             fputcsv($file, [
-                'ID', 'Key', 'Line Production', 'Requestor', 'Customer', 'Part Name', 'Part No', 
-                'Process', 'Machine', 'Qty', 'Planning Shift', 'Status', 'Check In', 'Check Out', 
-                'Total Time Needed (seconds)', 'Notes', 'Assigned To', 'Created At', 'Updated At'
+                $ticket->id,
+                $ticket->ddcnk_id,
+                $ticket->line_production,
+                $ticket->addedByUser->name ?? 'N/A',
+                $ticket->customer,
+                $ticket->nama_part,
+                $ticket->nomor_part,
+                $ticket->proses,
+                $ticket->mesin,
+                $ticket->qty_pcs,
+                $ticket->planning_shift,
+                $ticket->status,
+                $ticket->check_in,
+                $ticket->check_out,
+                $totalTime,
+                $ticket->notes,
+                $ticket->assignedUser->name ?? 'N/A',
+                $ticket->created_at,
+                $ticket->updated_at
             ]);
+        }
+        fclose($file);
+    };
 
-            foreach ($tickets as $ticket) {
-                $totalTime = 'N/A';
-                if ($ticket->check_in && $ticket->check_out) {
-                    $checkIn = Carbon::parse($ticket->check_in);
-                    $checkOut = Carbon::parse($ticket->check_out);
-                    $totalTime = $checkIn->diffInSeconds($checkOut);
-                }
-
-                fputcsv($file, [
-                    $ticket->id,
-                    $ticket->ddcnk_id,
-                    $ticket->line_production,
-                    $ticket->addedByUser->name ?? 'N/A',
-                    $ticket->customer,
-                    $ticket->nama_part,
-                    $ticket->nomor_part,
-                    $ticket->proses,
-                    $ticket->mesin,
-                    $ticket->qty_pcs,
-                    $ticket->planning_shift,
-                    $ticket->status,
-                    $ticket->check_in,
-                    $ticket->check_out,
-                    $totalTime,
-                    $ticket->notes,
-                    $ticket->assignedUser->name ?? 'N/A',
-                    $ticket->created_at,
-                    $ticket->updated_at
-                ]);
-            }
-            fclose($file);
-        };
-
-        return response()->stream($callback, 200, $headers);
-    }
+    return response()->stream($callback, 200, $headers);
+}
 }
