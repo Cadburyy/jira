@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Dandory;
 use App\Models\User;
-use App\Models\Customer; // Import the Customer model
+use App\Models\Customer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Mail\TicketAssignedMail;
@@ -182,18 +182,15 @@ public function updateStatus(Request $request, Dandory $dandory)
 
     if ($newStatus == 'IN PROGRESS') {
         if ($oldStatus != 'PENDING') {
-            // New timer started from TO DO
             $updateData['check_in'] = Carbon::now();
             $updateData['check_out'] = null;
-            $updateData['total_work_time_seconds'] = 0; // Reset total time for a new session
+            $updateData['total_work_time_seconds'] = 0;
         } else {
-            // Resuming from PENDING, don't reset total_work_time
             $updateData['check_in'] = Carbon::now();
             $updateData['check_out'] = null;
         }
     } elseif ($newStatus == 'PENDING') {
         if ($oldStatus == 'IN PROGRESS' && $dandory->check_in) {
-            // Pause the timer and add elapsed time to total
             $elapsedTime = Carbon::parse($dandory->check_in)->diffInSeconds(Carbon::now());
             $updateData['total_work_time_seconds'] = ($dandory->total_work_time_seconds ?? 0) + $elapsedTime;
             $updateData['check_in'] = null;
@@ -201,13 +198,11 @@ public function updateStatus(Request $request, Dandory $dandory)
         }
     } elseif ($newStatus == 'FINISH') {
         if ($oldStatus == 'IN PROGRESS' && $dandory->check_in) {
-            // Finalize the timer and add last duration to total
             $elapsedTime = Carbon::parse($dandory->check_in)->diffInSeconds(Carbon::now());
             $updateData['total_work_time_seconds'] = ($dandory->total_work_time_seconds ?? 0) + $elapsedTime;
         }
         $updateData['check_out'] = Carbon::now();
     } elseif ($newStatus == 'TO DO') {
-        // Reset the ticket entirely
         $updateData['check_in'] = null;
         $updateData['check_out'] = null;
         $updateData['total_work_time_seconds'] = 0;
@@ -337,10 +332,8 @@ public function updateStatus(Request $request, Dandory $dandory)
         ]);
 
         foreach ($tickets as $ticket) {
-            // Use the new total_work_time_seconds field
             $totalTime = $ticket->total_work_time_seconds;
 
-            // If the status is currently IN PROGRESS, add the active session duration
             if ($ticket->status == 'IN PROGRESS' && $ticket->check_in) {
                 $elapsedTime = Carbon::parse($ticket->check_in)->diffInSeconds(Carbon::now());
                 $totalTime += $elapsedTime;
