@@ -225,8 +225,8 @@ $isTeknisiAdmin = $user->hasRole('AdminTeknisi');
     const centerTextPlugin = {
         id: 'centerTextPlugin',
         beforeDraw: function(chart) {
-            const activeElements = chart.tooltip.getActiveElements();
-            if (activeElements && activeElements.length > 0) {
+            const activeElements = chart.tooltip?.getActiveElements() || [];
+            if (activeElements.length === 0) return; {
                 const activeElement = activeElements[0];
                 const dataIndex = activeElement.index;
                 const value = chart.data.datasets[0].data[dataIndex];
