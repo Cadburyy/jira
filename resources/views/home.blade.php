@@ -196,8 +196,6 @@ $isTeknisiAdmin = $user->hasRole('AdminTeknisi');
 
 </div>
 
-<audio id="newTicketAudio" src="{{ asset('audio/new-ticket-alert.mp3') }}" preload="auto"></audio>
-
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
 <script>
@@ -510,7 +508,6 @@ $isTeknisiAdmin = $user->hasRole('AdminTeknisi');
         if (isView) {
             let lastTableState = "";
             const tableBody = document.getElementById('dandori-table-body');
-            const newTicketAudio = document.getElementById('newTicketAudio');
             const discoOverlay = document.getElementById('disco-overlay');
 
             async function fetchAndUpdateTable() {
@@ -529,7 +526,6 @@ $isTeknisiAdmin = $user->hasRole('AdminTeknisi');
                     }).sort((a,b) => a.id.localeCompare(b.id)));
                     
                     if (lastTableState !== "" && currentTableState !== lastTableState) {
-                        newTicketAudio.play();
                         discoOverlay.classList.add('active'); 
                         setTimeout(() => {
                             discoOverlay.classList.remove('active');
