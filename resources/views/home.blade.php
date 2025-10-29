@@ -530,7 +530,7 @@ $isStandardTeknisi = $isTeknisi && !$isAdmin && !$isTeknisiAdmin;
                         discoOverlay.classList.add('active'); 
                         setTimeout(() => {
                             discoOverlay.classList.remove('active');
-                        }, 10000); 
+                        }, 60000); 
                     }
 
                     tableBody.innerHTML = '';
