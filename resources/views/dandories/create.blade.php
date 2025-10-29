@@ -34,7 +34,7 @@
                     <div class="form-group">
                         <label for="customer" class="form-label"><strong>Customer:</strong></label>
                         <input list="customers" name="customer" id="customer-input" 
-                            class="form-control" value="{{ old('customer') }}" required autocomplete="off">
+                            class="form-control" value="{{ old('customer') }}" required autocomplete="off" oninput="this.value = this.value.toUpperCase()">
 
                         <datalist id="customers">
                             @foreach ($customers as $customer)
