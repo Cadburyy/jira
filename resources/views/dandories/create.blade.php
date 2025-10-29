@@ -79,24 +79,48 @@
                         <input type="number" name="qty_pcs" class="form-control" placeholder="Qty. PCS" value="{{ old('qty_pcs') }}" required autocomplete="off">
                     </div>
                 </div>
+                
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="dies_type" class="form-label"><strong>Dies Type:</strong></label>
+                        <select name="dies_type" id="dies_type" class="form-control" required>
+                            <option value="">-- Select Dies Type --</option>
+                            <option value="small" {{ old('dies_type') == 'small' ? 'selected' : '' }}>Small (20 min)</option>
+                            <option value="medium" {{ old('dies_type') == 'medium' ? 'selected' : '' }}>Medium (30 min)</option>
+                            <option value="big" {{ old('dies_type') == 'big' ? 'selected' : '' }}>Big (45 min)</option>
+                        </select>
+                    </div>
+                </div>
+
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="planning_shift" class="form-label"><strong>Planning Shift:</strong></label>
-                        <select name="planning_shift" class="form-control" required>
-                            <option value="">-- Select Shift --</option>
-                            @for ($i = 7; $i <= 16; $i++)
-                                <option value="1/{{ sprintf('%02d:00', $i) }}" {{ old('planning_shift') == '1/' . sprintf('%02d:00', $i) ? 'selected' : '' }}>
-                                    1/{{ sprintf('%02d:00', $i) }}
-                                </option>
-                            @endfor
-                            @for ($i = 16; $i <= 24; $i++)
-                                <option value="2/{{ sprintf('%02d:00', $i) }}" {{ old('planning_shift') == '2/' . sprintf('%02d:00', $i) ? 'selected' : '' }}>
-                                    2/{{ sprintf('%02d:00', $i) }}
-                                </option>
+                        <select name="planning_shift" id="planning_shift" class="form-control" required>
+                            <option value="">-- Select Shift Time --</option>
+                            @for ($i = 7; $i < 24; $i++)
+                                @foreach(['00', '30'] as $minute)
+                                    @php
+                                        $time = sprintf('%02d:%s', $i, $minute);
+                                        $shift = ($i < 16) || ($i == 16 && $minute == '00') ? 1 : 2; 
+                                        $value = "$shift/$time";
+                                    @endphp
+                                    <option value="{{ $value }}" {{ old('planning_shift') == $value ? 'selected' : '' }}>
+                                        {{ $value }}
+                                    </option>
+                                @endforeach
                             @endfor
                         </select>
                     </div>
                 </div>
+
+                <div class="col-12">
+                    <div class="card bg-light p-3 border-info">
+                        <strong>Estimated Completion Time:</strong>
+                        <span id="estimated-completion-display" class="fs-4 text-info fw-bold">N/A</span>
+                        <small class="text-muted">Calculated based on Planning Shift + Dies Type duration.</small>
+                    </div>
+                </div>
+
                 <div class="col-12">
                     <div class="form-group">
                         <label for="notes" class="form-label"><strong>Notes:</strong></label>
@@ -112,4 +136,50 @@
         </form>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const diesTypeSelect = document.getElementById('dies_type');
+        const planningShiftSelect = document.getElementById('planning_shift');
+        const displayElement = document.getElementById('estimated-completion-display');
+        
+        const diesDurations = { 'small': 20, 'medium': 30, 'big': 45 };
+
+        function calculateEstimate() {
+            const planningShiftValue = planningShiftSelect.value;
+            const diesTypeValue = diesTypeSelect.value;
+
+            if (!planningShiftValue || !diesTypeValue) {
+                displayElement.textContent = 'N/A';
+                return;
+            }
+
+            const minutesToAdd = diesDurations[diesTypeValue];
+            const timePart = planningShiftValue.split('/')[1];
+
+            if (!timePart || minutesToAdd === undefined) {
+                displayElement.textContent = 'N/A';
+                return;
+            }
+
+            let [hours, minutes] = timePart.split(':').map(Number);
+            
+            minutes += minutesToAdd;
+
+            hours += Math.floor(minutes / 60);
+            minutes %= 60;
+            
+            hours %= 24; 
+
+            const estimatedCompletion = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+            
+            displayElement.textContent = estimatedCompletion;
+        }
+
+        diesTypeSelect.addEventListener('change', calculateEstimate);
+        planningShiftSelect.addEventListener('change', calculateEstimate);
+
+        calculateEstimate();
+    });
+</script>
 @endsection

@@ -7,7 +7,7 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\DandoryController;
 use App\Http\Controllers\SettingsController;
-use App\Http\Controllers\CustomerController; // Import the new controller
+use App\Http\Controllers\CustomerController;
 
 Route::get('/', function () {
     if (Auth::check()) {

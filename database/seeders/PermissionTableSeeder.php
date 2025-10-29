@@ -8,11 +8,6 @@ use Spatie\Permission\Models\Permission;
 
 class PermissionTableSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     *
-     * @return void
-     */
     public function run()
     {
         $permissions = [
@@ -26,7 +21,6 @@ class PermissionTableSeeder extends Seeder
            'dandory-delete'
         ];
 
-        // Create the permissions if they don't already exist
         foreach ($permissions as $permission) {
              Permission::firstOrCreate(['name' => $permission]);
         }

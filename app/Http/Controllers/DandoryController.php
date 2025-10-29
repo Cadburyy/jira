@@ -15,6 +15,12 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class DandoryController extends Controller
 {
+    private $diesDurations = [
+        'SMALL' => 20,
+        'MEDIUM' => 30,
+        'BIG' => 45,
+    ];
+
     public function __construct()
     {
         date_default_timezone_set('Asia/Jakarta');
@@ -88,6 +94,28 @@ class DandoryController extends Controller
         return view('dandories.create', compact('customers'));
     }
 
+    private function calculateCompletionTime(array $validatedData): array
+    {
+        $planningShift = $validatedData['planning_shift'];
+        $diesType = $validatedData['dies_type'];
+
+        $timePart = substr($planningShift, strpos($planningShift, '/') + 1);
+        
+        $minutesToAdd = $this->diesDurations[strtoupper($diesType)] ?? 0;
+
+        try {
+            $baseTime = Carbon::createFromFormat('H:i', $timePart, 'Asia/Jakarta');
+            $estimatedCompletionTime = $baseTime->addMinutes($minutesToAdd)->format('H:i');
+            $validatedData['estimate_completion'] = $estimatedCompletionTime;
+
+        } catch (\Exception $e) {
+            $validatedData['estimate_completion'] = null;
+            \Log::error("Error calculating estimate_completion for ticket: " . $e->getMessage());
+        }
+        
+        return $validatedData;
+    }
+
     public function store(Request $request)
     {
         $validatedData = $request->validate([
@@ -99,6 +127,7 @@ class DandoryController extends Controller
             'mesin' => 'required|string|max:255',
             'qty_pcs' => 'required|integer|min:1',
             'planning_shift' => 'required|string|max:255',
+            'dies_type' => 'required|in:small,medium,big',
             'notes' => 'nullable|string',
             'line_production' => 'required|string|max:255',
         ]);
@@ -109,6 +138,8 @@ class DandoryController extends Controller
         
         $validatedData['ddcnk_id'] = 'DDCNK-' . $newId;
         $validatedData['added_by'] = Auth::id();
+        
+        $validatedData = $this->calculateCompletionTime($validatedData);
         
         Dandory::create($validatedData);
 
@@ -153,11 +184,14 @@ class DandoryController extends Controller
             'mesin' => 'required|string|max:255',
             'qty_pcs' => 'required|integer|min:1',
             'planning_shift' => 'required|string|max:255',
+            'dies_type' => 'required|in:small,medium,big',
             'status' => 'required|in:TO DO,IN PROGRESS,FINISH,PENDING',
             'notes' => 'nullable|string',
             'assigned_to' => 'nullable|integer',
             'line_production' => 'required|string|max:255',
         ]);
+        
+        $validatedData = $this->calculateCompletionTime($validatedData);
         
         $dandory->update($validatedData);
 
@@ -228,6 +262,14 @@ public function updateStatus(Request $request, Dandory $dandory)
         $value = $request->input('value');
         
         $dandory->update([$field => $value]);
+        
+        if ($field === 'planning_shift') {
+            $updatedData = $this->calculateCompletionTime([
+                'planning_shift' => $value,
+                'dies_type' => $dandory->dies_type,
+            ]);
+            $dandory->update(['estimate_completion' => $updatedData['estimate_completion']]);
+        }
         
         return response()->json(['success' => true, 'message' => 'Planning setting updated successfully.']);
     }
@@ -327,7 +369,7 @@ public function updateStatus(Request $request, Dandory $dandory)
 
         fputcsv($file, [
             'ID', 'Key', 'Line Production', 'Requestor', 'Customer', 'Part Name', 'Part No', 
-            'Process', 'Machine', 'Qty', 'Planning Shift', 'Status', 'Check In', 'Check Out', 
+            'Process', 'Machine', 'Qty', 'Planning Shift', 'Dies Type', 'Estimate Completion', 'Status', 'Check In', 'Check Out', 
             'Total Time Needed (seconds)', 'Notes', 'Assigned To', 'Created At', 'Updated At'
         ]);
 
@@ -351,6 +393,8 @@ public function updateStatus(Request $request, Dandory $dandory)
                 $ticket->mesin,
                 $ticket->qty_pcs,
                 $ticket->planning_shift,
+                $ticket->dies_type,
+                $ticket->estimate_completion,
                 $ticket->status,
                 $ticket->check_in,
                 $ticket->check_out,

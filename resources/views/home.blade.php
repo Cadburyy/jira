@@ -8,6 +8,7 @@ $isRequestor = $user->hasRole('Requestor');
 $isTeknisi = $user->hasRole('Teknisi');
 $isView = $user->hasRole('Views');
 $isTeknisiAdmin = $user->hasRole('AdminTeknisi');
+$isStandardTeknisi = $isTeknisi && !$isAdmin && !$isTeknisiAdmin;
 @endphp
 
 <style>

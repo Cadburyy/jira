@@ -1,7 +1,4 @@
 <?php
-
-// C:\Project\jira\app\Http\Controllers\CustomerController.php
-
 namespace App\Http\Controllers;
 
 use App\Models\Customer;
@@ -34,7 +31,6 @@ class CustomerController extends Controller
 
     public function show(Customer $customer)
     {
-        // For simplicity, we won't implement a dedicated show page
         return redirect()->route('customers.index');
     }
 

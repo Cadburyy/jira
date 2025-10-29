@@ -19,6 +19,9 @@ class HomeController extends Controller
 
     public function index()
     {
+        $user = auth()->user();
+        $isStandardTeknisi = $user->hasRole('Teknisi') && !$user->hasRole('AdminTeknisi') && !$user->hasRole('Admin');
+
         $ticketStatusData = Dandory::select('status', DB::raw('count(*) as count'))
             ->groupBy('status')
             ->pluck('count', 'status')
@@ -64,13 +67,25 @@ class HomeController extends Controller
             'colors' => $dandoriManColors,
         ];
 
-        $dailyTicketCounts = Dandory::where('created_at', '>=', Carbon::now()->subDays(30))
+        $dailyQuery = Dandory::where('created_at', '>=', Carbon::now()->subDays(30));
+        
+        if ($isStandardTeknisi) {
+            $dailyQuery->where('assigned_to', $user->id);
+        }
+
+        $dailyTicketCounts = $dailyQuery
             ->select(DB::raw('DATE_FORMAT(created_at, "%Y-%m-%d") as date'), DB::raw('count(*) as count'))
             ->groupBy('date')
             ->get()
             ->pluck('count', 'date');
             
-        $monthlyTicketCounts = Dandory::where('created_at', '>=', Carbon::now()->subMonths(12))
+        $monthlyQuery = Dandory::where('created_at', '>=', Carbon::now()->subMonths(12));
+        
+        if ($isStandardTeknisi) {
+            $monthlyQuery->where('assigned_to', $user->id);
+        }
+
+        $monthlyTicketCounts = $monthlyQuery
             ->select(DB::raw('DATE_FORMAT(created_at, "%Y-%m") as month'), DB::raw('count(*) as count'))
             ->groupBy('month')
             ->get()

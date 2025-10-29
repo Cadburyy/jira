@@ -20,6 +20,8 @@ class Dandory extends Model
         'mesin',
         'qty_pcs',
         'planning_shift',
+        'dies_type',
+        'estimate_completion',
         'status',
         'check_in',
         'check_out',
@@ -29,12 +31,10 @@ class Dandory extends Model
         'added_by',
     ];
 
-
     public function assignedUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'assigned_to');
     }
-
 
     public function addedByUser(): BelongsTo
     {
