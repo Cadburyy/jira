@@ -94,11 +94,6 @@ class HomeController extends Controller
         return view('home', compact('ticketStatusChartData', 'dandoriManChartData', 'dailyTicketCounts', 'monthlyTicketCounts'));
     }
 
-    /**
-     * Get a list of all dandori tickets to be displayed on the dashboard for the 'Views' role.
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
     public function getDandoriTicketsData()
     {
         $dandories = Dandory::all();
@@ -126,11 +121,6 @@ class HomeController extends Controller
         return response()->json($tickets);
     }
 
-    /**
-     * Get chart data for auto-refresh.
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
     public function getChartData()
     {
         $ticketStatusData = Dandory::select('status', DB::raw('count(*) as count'))

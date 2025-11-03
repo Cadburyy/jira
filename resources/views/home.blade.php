@@ -47,7 +47,43 @@ $isStandardTeknisi = $isTeknisi && !$isAdmin && !$isTeknisiAdmin;
         width: 100%;
         max-width: 250px;
     }
+    
+    #disco-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.0);
+        z-index: 9999;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.5s ease-in-out;
+    }
+
+    /* New Keyframes for Hard Blinking Color Change */
+    @keyframes disco-blink {
+        0% { background-color: rgba(255, 0, 0, 0.3); }     /* Red */
+        16% { background-color: rgba(255, 165, 0, 0.3); }   /* Orange */
+        33% { background-color: rgba(255, 255, 0, 0.3); }   /* Yellow */
+        50% { background-color: rgba(0, 128, 0, 0.3); }     /* Green */
+        66% { background-color: rgba(0, 0, 255, 0.3); }     /* Blue */
+        83% { background-color: rgba(75, 0, 130, 0.3); }    /* Indigo/Violet */
+        100% { background-color: rgba(255, 0, 0, 0.3); }    /* Loop back to Red */
+    }
+    
+    #disco-overlay.active {
+        animation: disco-blink 2s infinite step-end; /* Cycle all 6 colors every 2 seconds, with no smooth transition */
+        opacity: 1;
+        transition: opacity 0.5s ease-in-out;
+        pointer-events: none;
+    }
 </style>
+
+{{-- ADDED THE MISSING DISCO OVERLAY ELEMENT --}}
+@if($isView)
+<div id="disco-overlay"></div>
+@endif
 
 <div class="container py-3">
     <h2 class="text-center mb-2 text-dark"><strong>Welcome, {{ $user->name }} 👋</strong></h2>
@@ -493,7 +529,7 @@ $isStandardTeknisi = $isTeknisi && !$isAdmin && !$isTeknisiAdmin;
                         }
                     });
             }
-            setInterval(updateTicketStatusChart, 30000);
+            setInterval(updateTicketStatusChart, 10000);
         }
 
         if (isAdminOrTeknisi || isRequestor) {
@@ -527,10 +563,12 @@ $isStandardTeknisi = $isTeknisi && !$isAdmin && !$isTeknisiAdmin;
                     }).sort((a,b) => a.id.localeCompare(b.id)));
                     
                     if (lastTableState !== "" && currentTableState !== lastTableState) {
-                        discoOverlay.classList.add('active'); 
-                        setTimeout(() => {
-                            discoOverlay.classList.remove('active');
-                        }, 60000); 
+                        if (discoOverlay) {
+                            discoOverlay.classList.add('active'); 
+                            setTimeout(() => {
+                                discoOverlay.classList.remove('active');
+                            }, 30000); 
+                        }
                     }
 
                     tableBody.innerHTML = '';
@@ -563,7 +601,7 @@ $isStandardTeknisi = $isTeknisi && !$isAdmin && !$isTeknisiAdmin;
             }
 
             fetchAndUpdateTable();
-            setInterval(fetchAndUpdateTable, 30000);
+            setInterval(fetchAndUpdateTable, 10000);
         }
     });
 </script>

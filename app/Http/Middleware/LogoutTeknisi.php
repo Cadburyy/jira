@@ -18,7 +18,7 @@ class LogoutTeknisi
                 $lastActivity = session('last_activity_time');
                 $now = Carbon::now();
 
-                if ($lastActivity && $now->diffInMinutes($lastActivity) >= 1) { // 1 minute inactivity
+                if ($lastActivity && $now->diffInSeconds($lastActivity) >= 30) {
                     Auth::logout();
                     $request->session()->invalidate();
                     $request->session()->regenerateToken();
