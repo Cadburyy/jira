@@ -82,7 +82,7 @@
                 
                 <div class="col-md-6">
                     <div class="form-group">
-                        <label for="dies_type" class="form-label"><strong>Dies Type:</strong></label>
+                        <label for="dies_type" class="form-label"><strong>Dies Type/Tipe Dies:</strong></label>
                         <select name="dies_type" id="dies_type" class="form-control" required>
                             <option value="">-- Select Dies Type --</option>
                             <option value="small" {{ old('dies_type') == 'small' ? 'selected' : '' }}>Small (20 min)</option>
@@ -94,7 +94,7 @@
 
                 <div class="col-md-6">
                     <div class="form-group">
-                        <label for="planning_shift" class="form-label"><strong>Planning Shift:</strong></label>
+                        <label for="planning_shift" class="form-label"><strong>Planning Shift/Mulai Pengantian Dies:</strong></label>
                         <select name="planning_shift" id="planning_shift" class="form-control" required>
                             <option value="">-- Select Shift Time --</option>
                             @for ($i = 7; $i < 24; $i++)
@@ -115,7 +115,7 @@
 
                 <div class="col-12">
                     <div class="card bg-light p-3 border-info">
-                        <strong>Estimated Completion Time:</strong>
+                        <strong>Estimasi Selesai Pengerjaan:</strong>
                         <span id="estimated-completion-display" class="fs-4 text-info fw-bold">N/A</span>
                         <small class="text-muted">Calculated based on Planning Shift + Dies Type duration.</small>
                     </div>
